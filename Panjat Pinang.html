@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1a2e">
+<title>Panjat Pinang - Petualangan Rumah Adat</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Bangers&family=Luckiest+Guy&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-tap-highlight-color:transparent; }
+html, body { width:100%; height:100%; overflow:hidden; font-family:'Poppins',Arial,sans-serif; background:#000; color:#fff; }
+
+#app {
+  position: fixed; top:0; left:0;
+  width: 100vw; height: 100vh; height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, #1e3c72 0%, #2a5298 50%, #1a1a2e 100%);
+  overflow: hidden;
+  touch-action: none;
+}
+
+#gameWrap {
+  position: relative;
+  width: 900px;
+  height: 540px;
+  transform-origin: center center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7), 0 0 80px rgba(255,215,0,0.15);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #ffd700;
+  transform: scale(1);
+}
+
+.screen { position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; overflow:hidden; }
+.screen.active { display:flex; }
+
+/* ===== ROTATE HINT (untuk HP portrait) ===== */
+.rotate-hint {
+  display: none;
+  position: fixed; top:0; left:0; width:100vw; height:100vh; height:100dvh;
+  background: linear-gradient(180deg, #1a1a2e, #2a5298);
+  z-index: 9999;
+  align-items: center; justify-content: center; flex-direction: column;
+  color: #FFD700; text-align: center; padding: 20px;
+}
+.rotate-hint-icon { font-size: 80px; animation: rotateHintAnim 2s ease-in-out infinite; margin-bottom: 20px; }
+@keyframes rotateHintAnim { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
+.rotate-hint-text { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #FFF8E1; margin-bottom: 8px; }
+.rotate-hint-sub { font-size: 13px; color: #FFD9A0; opacity: 0.9; }
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rotate-hint { display: flex; }
+}
+
+/* ===== HOME SCENE ===== */
+.scene-bg { position: absolute; top:0; left:0; width:100%; height:100%; overflow:hidden;
+  background: linear-gradient(180deg, #4FC3F7 0%, #81D4FA 25%, #B3E5FC 50%, #E1F5FE 70%, #C8E6C9 85%, #A5D6A7 100%); }
+
+.sun-day { position: absolute; top: 40px; right: 90px; width: 90px; height: 90px;
+  background: radial-gradient(circle, #FFF9C4 0%, #FFEB3B 45%, #FFC107 75%, transparent 100%);
+  border-radius: 50%; box-shadow: 0 0 60px #FFEB3B, 0 0 120px rgba(255,235,59,0.6);
+  animation: sunDayGlow 6s ease-in-out infinite; z-index: 2; }
+@keyframes sunDayGlow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+.cloud-day { position: absolute; background: #fff; border-radius: 50px; z-index: 2; opacity: 0.95; }
+.cloud-day::before, .cloud-day::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+.cd1 { width: 110px; height: 32px; top: 60px; left: -150px; animation: cloudMoveDay 50s linear infinite; }
+.cd1::before { width: 55px; height: 55px; top: -26px; left: 15px; }
+.cd1::after { width: 40px; height: 40px; top: -18px; left: 60px; }
+.cd2 { width: 85px; height: 26px; top: 130px; left: -120px; animation: cloudMoveDay 65s linear infinite; animation-delay:-25s; }
+.cd2::before { width: 42px; height: 42px; top: -20px; left: 12px; }
+.cd2::after { width: 30px; height: 30px; top: -14px; left: 48px; }
+.cd3 { width: 130px; height: 38px; top: 25px; left: -180px; animation: cloudMoveDay 80s linear infinite; animation-delay:-50s; }
+.cd3::before { width: 62px; height: 62px; top: -30px; left: 18px; }
+.cd3::after { width: 44px; height: 44px; top: -22px; left: 70px; }
+@keyframes cloudMoveDay { from { transform: translateX(0); } to { transform: translateX(1200px); } }
+
+.hill-bg { position: absolute; bottom: 130px; left: 0; width: 100%; height: 100px; z-index: 1; }
+.hill-bg svg { display: block; width: 100%; height: auto; }
+
+.trees-row { position: absolute; bottom: 120px; left: 0; width: 100%; height: 90px; z-index: 3;
+  display: flex; justify-content: space-around; align-items: flex-end; padding: 0 20px; }
+.tree { position: relative; width: 40px; }
+.tree-trunk { width: 6px; height: 30px; background: linear-gradient(90deg, #5D4037, #8D6E63, #5D4037); margin: 0 auto; border-radius: 2px; }
+.tree-leaf { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px;
+  background: radial-gradient(circle at 40% 35%, #66BB6A, #388E3C 70%, #2E7D32); border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+
+.house-row { position: absolute; bottom: 115px; left: 0; width: 100%; height: 70px; z-index: 4;
+  display: flex; justify-content: space-around; align-items: flex-end; padding: 0 30px; opacity: 0.95; }
+.house-mini { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+
+.ground-day { position: absolute; bottom: 0; left: 0; width: 100%; height: 130px;
+  background: linear-gradient(180deg, #A5D6A7 0%, #81C784 40%, #66BB6A 100%); z-index: 5; }
+.ground-day::before { content: ''; position: absolute; top: -10px; left: 0; width: 100%; height: 20px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 15px, #81C784 15px, #81C784 17px);
+  border-radius: 50% 50% 0 0 / 20px 20px 0 0; }
+
+.grass-tufts { position: absolute; bottom: 125px; left: 0; width: 100%; height: 20px; z-index: 6; pointer-events: none; }
+.grass-tuft { position: absolute; width: 3px; height: 10px; background: #388E3C; border-radius: 2px; }
+.grass-tuft::before, .grass-tuft::after { content: ''; position: absolute; width: 3px; height: 8px; background: #388E3C; border-radius: 2px; top: 2px; }
+.grass-tuft::before { transform: rotate(-25deg); transform-origin: bottom; }
+.grass-tuft::after { transform: rotate(25deg); transform-origin: bottom; }
+
+.crowd-day { position: absolute; bottom: 118px; left: 0; width: 100%; height: 45px; z-index: 7; }
+.person-day { position: absolute; bottom: 0; width: 16px; border-radius: 6px 6px 0 0; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+.person-day::before { content: ''; position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 12px; background: #FFCC80; border-radius: 50%; border: 2px solid #8D6E63; }
+.person-day::after { content: ''; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  width: 14px; height: 6px; background: #5D4037; border-radius: 50% 50% 0 0; }
+.pd1 { left: 4%; height: 34px; background: linear-gradient(180deg, #E57373, #C62828); animation: bob 1.5s ease-in-out infinite; }
+.pd2 { left: 10%; height: 30px; background: linear-gradient(180deg, #64B5F6, #1565C0); animation: bob 1.8s ease-in-out infinite; animation-delay:-0.3s; }
+.pd3 { left: 16%; height: 36px; background: linear-gradient(180deg, #81C784, #2E7D32); animation: bob 1.4s ease-in-out infinite; animation-delay:-0.6s; }
+.pd4 { left: 24%; height: 32px; background: linear-gradient(180deg, #FFB74D, #E65100); animation: bob 1.6s ease-in-out infinite; animation-delay:-0.9s; }
+.pd5 { left: 70%; height: 34px; background: linear-gradient(180deg, #BA68C8, #6A1B9A); animation: bob 1.7s ease-in-out infinite; animation-delay:-0.2s; }
+.pd6 { left: 76%; height: 30px; background: linear-gradient(180deg, #4DD0E1, #00838F); animation: bob 1.5s ease-in-out infinite; animation-delay:-0.5s; }
+.pd7 { left: 83%; height: 36px; background: linear-gradient(180deg, #F06292, #C2185B); animation: bob 1.9s ease-in-out infinite; animation-delay:-0.8s; }
+.pd8 { left: 90%; height: 32px; background: linear-gradient(180deg, #FFD54F, #F57F17); animation: bob 1.4s ease-in-out infinite; animation-delay:-1.1s; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+
+.pinang-big { position: absolute; bottom: 120px; left: 35%; transform: translateX(-50%);
+  z-index: 8; animation: pinangSway 5s ease-in-out infinite; transform-origin: bottom center;
+  filter: drop-shadow(4px 6px 12px rgba(0,0,0,0.25)); }
+@keyframes pinangSway { 0%, 100% { transform: translateX(-50%) rotate(-1.5deg); } 50% { transform: translateX(-50%) rotate(1.5deg); } }
+.pinang-trunk { width: 26px; height: 320px;
+  background: linear-gradient(90deg, #5D4037 0%, #8D6E63 35%, #A1887F 50%, #8D6E63 65%, #5D4037 100%);
+  border-radius: 8px; margin: 0 auto; position: relative;
+  box-shadow: inset -6px 0 12px rgba(0,0,0,0.35), inset 6px 0 12px rgba(255,255,255,0.1); }
+.trunk-ring { position: absolute; left: 0; width: 100%; height: 4px; background: rgba(61,45,30,0.4); border-radius: 2px; }
+.trunk-ring:nth-child(1) { top: 42px; } .trunk-ring:nth-child(2) { top: 84px; } .trunk-ring:nth-child(3) { top: 126px; }
+.trunk-ring:nth-child(4) { top: 168px; } .trunk-ring:nth-child(5) { top: 210px; } .trunk-ring:nth-child(6) { top: 252px; } .trunk-ring:nth-child(7) { top: 294px; }
+.pinang-leaves { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 180px; height: 110px; }
+.pl { position: absolute; width: 90px; height: 24px;
+  background: linear-gradient(90deg, #1B5E20 0%, #388E3C 40%, #66BB6A 60%, #388E3C 100%);
+  border-radius: 0 100% 0 100%; transform-origin: left center; left: 50%; top: 48px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3); border-bottom: 2px solid #2E7D32; }
+.pl1 { transform: rotate(-72deg); } .pl2 { transform: rotate(-38deg); } .pl3 { transform: rotate(0deg); }
+.pl4 { transform: rotate(38deg); } .pl5 { transform: rotate(72deg); }
+.pl6 { transform: rotate(-102deg); width: 60px; } .pl7 { transform: rotate(102deg); width: 60px; }
+.prize-top { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 90px; height: 45px; z-index: 2; }
+.prize-flag { position: absolute; font-size: 36px; filter: drop-shadow(0 0 14px #FFD700); animation: prizeFloat 2s ease-in-out infinite; }
+.prize-flag.f2 { left: -45px; top: 12px; font-size: 28px; animation-delay: -0.5s; }
+.prize-flag.f3 { left: 45px; top: 6px; font-size: 32px; animation-delay: -1s; }
+@keyframes prizeFloat { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-10px) rotate(5deg); } }
+.climber-day { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 9;
+  animation: climbBob 2s ease-in-out infinite; }
+@keyframes climbBob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-5px); } }
+.cl-head-day { width: 14px; height: 14px; background: #FFCC80; border-radius: 50%; margin: 0 auto; border: 2px solid #8B4513; }
+.cl-body-day { width: 18px; height: 20px; background: linear-gradient(180deg, #D32F2F, #B71C1C); border-radius: 5px; margin-top: 2px; border: 2px solid #8B0000; }
+
+/* ===== SIDE MENU ===== */
+.side-menu { position: absolute; top:0; right:0; width:340px; height:100%; z-index:20;
+  background: linear-gradient(180deg, #FFF8E1 0%, #FFECB3 100%);
+  border-left: 4px solid #8B4513;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; padding: 20px 18px;
+  animation: slideIn 0.6s ease-out; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.side-menu-header { text-align: center; padding-bottom: 15px; border-bottom: 3px dashed #8B4513; margin-bottom: 18px; }
+.sm-title { font-family: 'Luckiest Guy', cursive; font-size: 30px; font-weight: 400; letter-spacing: 2px;
+  background: linear-gradient(180deg, #FFA726 0%, #E65100 50%, #8B4513 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(2px 2px 0 #FFF8E1) drop-shadow(3px 3px 0 #8B4513); line-height: 1.2; }
+.sm-sub { font-family: 'Bangers', cursive; font-size: 14px; font-weight: 400; color: #8B4513;
+  letter-spacing: 4px; margin-top: 6px; text-shadow: 1px 1px 0 #FFF8E1, 2px 2px 0 rgba(139,69,19,0.2); }
+.sm-tagline { font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 500; color: #6D4C41;
+  margin-top: 10px; font-style: italic; line-height: 1.4; }
+.side-menu-body { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+
+.side-btn { display: flex; align-items: center; gap: 12px; padding: 13px 18px;
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.8px;
+  color: #FFF8E1;
+  background: linear-gradient(180deg, #A0522D 0%, #8B4513 50%, #6D4C41 100%);
+  border: 2px solid #FFD700; border-radius: 10px; cursor: pointer; transition: all 0.25s;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  box-shadow: 0 4px 0 #3E2723, 0 6px 12px rgba(139,69,19,0.3);
+  text-align: left; position: relative; overflow: hidden; }
+.side-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.35), transparent); transition: left 0.6s; }
+.side-btn:hover::before { left: 100%; }
+.side-btn:hover { transform: translateX(-4px);
+  background: linear-gradient(180deg, #C57B57 0%, #A0522D 50%, #8B4513 100%);
+  border-color: #FFEB3B; color: #FFFDE7;
+  box-shadow: 0 6px 0 #3E2723, 0 8px 20px rgba(139,69,19,0.4), 0 0 25px rgba(255,215,0,0.4); }
+.side-btn:active { transform: translateX(-2px) translateY(2px); box-shadow: 0 2px 0 #3E2723; }
+
+.side-btn.primary { background: linear-gradient(180deg, #FFA726 0%, #F57C00 50%, #E65100 100%);
+  border-color: #FFEB3B; color: #FFFFFF; font-size: 15px; font-weight: 700;
+  padding: 15px 18px; letter-spacing: 1.5px;
+  box-shadow: 0 5px 0 #7F1D1D, 0 6px 16px rgba(230,81,0,0.4), 0 0 25px rgba(255,167,38,0.5);
+  text-shadow: 2px 2px 3px rgba(139,0,0,0.8);
+  animation: pulseBtn 2s ease-in-out infinite; }
+@keyframes pulseBtn {
+  0%, 100% { box-shadow: 0 5px 0 #7F1D1D, 0 6px 16px rgba(230,81,0,0.4), 0 0 25px rgba(255,167,38,0.5); }
+  50% { box-shadow: 0 5px 0 #7F1D1D, 0 6px 16px rgba(230,81,0,0.5), 0 0 45px rgba(255,215,0,0.8); } }
+.side-btn.primary:hover { transform: translateX(-4px);
+  background: linear-gradient(180deg, #FFB74D 0%, #FF9800 50%, #F57C00 100%);
+  border-color: #FFF59D;
+  box-shadow: 0 7px 0 #7F1D1D, 0 8px 24px rgba(230,81,0,0.5), 0 0 50px rgba(255,215,0,0.9); }
+.side-btn.primary:active { box-shadow: 0 2px 0 #7F1D1D; }
+
+.sb-icon { font-size: 22px; min-width: 30px; text-align: center; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+.sb-text { flex: 1; text-align: left; }
+.side-menu-footer { padding-top: 12px; border-top: 2px dashed #8B4513; text-align: center; }
+.sm-footer-text { font-family: 'Poppins', sans-serif; font-size: 11px; color: #6D4C41;
+  font-weight: 600; letter-spacing: 0.5px; }
+
+.top-icons { position: absolute; top: 14px; left: 14px; display: flex; gap: 10px; z-index: 30; }
+.icon-btn { width:42px; height:42px; border-radius:50%; background: linear-gradient(180deg, rgba(139,0,0,0.9), rgba(80,0,0,0.9));
+  border: 2px solid #FFD700; color: #FFD700; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2); }
+.icon-btn:hover { background: linear-gradient(180deg, #FFD700, #FFA000); color: #8B0000; transform: scale(1.1) rotate(5deg); box-shadow: 0 0 20px rgba(255,215,0,0.8); }
+
+/* HEADER */
+.screen-header { display:flex; align-items:center; justify-content:space-between; padding:10px 16px;
+  background: linear-gradient(180deg, rgba(139,0,0,0.95), rgba(80,0,0,0.9)); border-bottom:3px solid #FFD700; z-index:10;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+.screen-title { font-family: 'Bangers', cursive; font-size:20px; font-weight:400; letter-spacing:3px;
+  color:#FFD700; text-shadow: 2px 2px 0 #8B0000; }
+.back-btn { font-family: 'Poppins', sans-serif; padding:7px 16px; background: linear-gradient(180deg, #FFD700, #FFA000);
+  color:#8B0000; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:12px;
+  border-bottom:3px solid #B8860B; letter-spacing:0.3px; }
+.back-btn:active { transform: translateY(2px); border-bottom-width:1px; }
+
+/* LEVEL GRID */
+.level-grid { flex:1; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: min-content; gap: 10px; padding: 12px 14px;
+  overflow-y: auto; background: radial-gradient(ellipse at top, #FFF3C4 0%, transparent 60%), linear-gradient(180deg, #FFF8E1 0%, #FFE0B2 100%); }
+.level-card { font-family: 'Poppins', sans-serif; background: linear-gradient(180deg, #FFFFFF, #FFF3E0);
+  border: 3px solid #8B4513; border-radius: 12px; padding: 10px 8px; text-align: center; cursor: pointer;
+  transition: all 0.25s; box-shadow: 0 4px 0 #5D4037, 0 6px 12px rgba(0,0,0,0.25); position: relative; overflow: hidden;
+  aspect-ratio: 4 / 3; max-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.level-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+  background: linear-gradient(90deg, #FFD700, #FF6347, #FFD700); }
+.level-card:hover { transform: translateY(-4px); box-shadow: 0 8px 0 #5D4037, 0 10px 18px rgba(0,0,0,0.35); border-color: #FFD700; }
+.level-card.completed { background: linear-gradient(180deg, #E8F5E9, #A5D6A7); border-color: #2E7D32; }
+.level-card .card-num-badge { display: inline-block; background: linear-gradient(180deg, #FFD700, #FFA000); color: #8B0000;
+  font-weight: 700; font-size: 10px; padding: 2px 10px; border-radius: 10px; border: 2px solid #8B4513;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.3px; margin-bottom: 5px; }
+.level-card.completed .card-num-badge { background: linear-gradient(180deg, #66BB6A, #2E7D32); color: #fff; border-color: #1B5E20; }
+.level-card .card-stars-badge { font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; color: #FFD700;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); min-height: 14px; }
+.level-card .level-region { font-size: 9px; font-weight: 700; color: #8B0000; margin-bottom: 3px; letter-spacing: 0.2px; line-height: 1.2; padding: 0 2px; }
+.level-card .level-house { font-size: 10px; color: #5D4037; font-weight: 600; margin-bottom: 6px; line-height: 1.2; padding: 0 2px; }
+.level-card .level-status { font-size: 9px; font-weight: 700; padding: 3px 10px; border-radius: 8px; display: inline-block; letter-spacing: 0.2px; }
+.status-open { background:#66BB6A; color:#fff; box-shadow: 0 2px 4px rgba(102,187,106,0.4); }
+.status-done { background:#FFD700; color:#8B0000; box-shadow: 0 2px 4px rgba(255,215,0,0.5); }
+
+/* GAME */
+#gameCanvas { display:block; width:100%; height:100%; background:#87CEEB; }
+.hud { position:absolute; top:0; left:0; width:100%; padding:8px 12px; display:flex; justify-content:space-between; align-items:flex-start;
+  z-index:20; pointer-events:none; font-family: 'Poppins', sans-serif; }
+.hud-left { display:flex; flex-direction:column; gap:4px; }
+.hud-level { background: rgba(139,0,0,0.9); color:#FFD700; padding:3px 10px; border-radius:8px; font-size:10px; font-weight:600;
+  border:2px solid #FFD700; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.hud-score { background: rgba(0,0,0,0.75); color:#FFD700; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;
+  border:2px solid #FFD700; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.hud-center { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.hud-time { background: rgba(0,0,0,0.8); color:#fff; padding:3px 12px; border-radius:8px; font-size:14px; font-weight:700;
+  border:2px solid #FFD700; min-width:80px; text-align:center; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.hud-time.warning { color:#FF5252; animation: timePulse 0.5s infinite; }
+@keyframes timePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+.hud-progress-wrap { display:flex; align-items:center; gap:5px; background: rgba(0,0,0,0.75); padding:3px 8px; border-radius:8px;
+  border:2px solid #FFD700; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.hud-progress-label { font-size:9px; color:#FFD700; font-weight:600; }
+.hud-progress-bar { width:100px; height:9px; background: rgba(255,255,255,0.25); border-radius:5px; overflow:hidden; }
+.hud-progress-fill { height:100%; width:0%; background: linear-gradient(90deg, #FFD700, #FF6347); border-radius:5px; transition: width 0.2s; }
+.hud-progress-text { font-size:9px; color:#fff; font-weight:600; min-width:26px; }
+.hud-right { display:flex; flex-direction:column; gap:4px; align-items:flex-end; }
+.hud-lives { background: rgba(0,0,0,0.75); padding:3px 8px; border-radius:8px; border:2px solid #FFD700; font-size:14px; letter-spacing:1px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.hud-pause-btn { pointer-events:auto; background: rgba(139,0,0,0.9); color:#FFD700; border:2px solid #FFD700; padding:3px 10px;
+  border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; font-family: 'Poppins', sans-serif; letter-spacing:0.3px; }
+.hud-pause-btn:hover { background:#FFD700; color:#8B0000; }
+.mobile-controls { position:absolute; bottom:0; left:0; width:100%; display:none; justify-content:space-between; padding:12px 16px; z-index:25; pointer-events:none; }
+.mobile-controls .ctrl-group { display:flex; gap:12px; pointer-events:auto; }
+.ctrl-btn { width:58px; height:58px; border-radius:50%; background: rgba(139,0,0,0.85); border:3px solid #FFD700; color:#FFD700;
+  font-size:22px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  box-shadow: 0 4px 0 #5D4037; transition: all 0.1s; }
+.ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #5D4037; background:#FFD700; color:#8B0000; }
+
+/* POPUP */
+.popup-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8);
+  display:none; align-items:center; justify-content:center; z-index:100; padding:16px; backdrop-filter: blur(3px); }
+.popup-overlay.active { display:flex; }
+.popup { font-family: 'Poppins', sans-serif; background: linear-gradient(180deg, #FFF8E1, #FFE0B2);
+  border:4px solid #FFD700; border-radius:16px; padding:18px; max-width:600px; width:100%; max-height:96%; overflow-y:auto; text-align:center;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 40px rgba(255,215,0,0.3);
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { 0%{transform:scale(0.6); opacity:0} 100%{transform:scale(1); opacity:1} }
+.popup h2 { font-family: 'Bangers', cursive; color:#8B0000; font-size:26px; font-weight:400; margin-bottom:10px;
+  text-shadow: 1px 1px 0 #FFD700, 2px 2px 4px rgba(0,0,0,0.1); letter-spacing:2px; }
+.popup p { color:#5D4037; font-size:13px; line-height:1.5; margin-bottom:8px; font-weight:500; }
+.popup .popup-emoji { font-size:48px; margin-bottom:8px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+.popup-buttons { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+.popup-btn { font-family: 'Poppins', sans-serif; padding:10px 20px; font-size:13px; font-weight:600; border:none; border-radius:10px;
+  cursor:pointer; color:#fff; letter-spacing:0.3px; background: linear-gradient(180deg, #FF8C42, #E63946);
+  border-bottom:4px solid #7F1D1D; transition: all 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.popup-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+.popup-btn:active { transform: translateY(2px); border-bottom-width:2px; }
+.popup-btn.blue { background: linear-gradient(180deg, #4A90E2, #2C5F9E); border-bottom-color:#1A3A5C; }
+.popup-btn.green { background: linear-gradient(180deg, #66BB6A, #2E7D32); border-bottom-color:#1B5E20; }
+.popup-btn.gold { background: linear-gradient(180deg, #FFD700, #FFA000); color:#8B0000; border-bottom-color:#B8860B; }
+.popup-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.how-to-list { text-align:left; margin:12px 0; padding-left:18px; }
+.how-to-list li { color:#5D4037; margin-bottom:6px; font-size:13px; line-height:1.5; font-weight:500; }
+.control-info { background:#fff; border:2px solid #8B4513; border-radius:8px; padding:10px; margin:8px 0;
+  text-align:left; font-size:12px; color:#5D4037; font-weight:500; }
+.control-info b { color:#8B0000; }
+
+.materi-box { background:#fff; border:2px solid #8B4513; border-radius:10px; padding:12px; margin:8px 0; text-align:left; }
+.materi-box h3 { font-family: 'Poppins', sans-serif; color:#8B0000; font-size:14px; font-weight:700; margin-bottom:6px;
+  border-bottom:2px dashed #FFD700; padding-bottom:5px; }
+.materi-box p { color:#3E2723; font-size:12px; line-height:1.5; margin-bottom:6px; font-weight:500; }
+.materi-box .facts { background:#E8F5E9; border-left:4px solid #2E7D32; padding:8px 10px; border-radius:6px; margin-top:8px;
+  font-size:12px; line-height:1.4; color:#1B5E20; font-weight:500; }
+.materi-box .facts b { color:#1B5E20; }
+.materi-box .highlight { background:#FFF9C4; padding:1px 5px; border-radius:3px; font-weight:bold; color:#8B0000; }
+
+/* ENSIKLOPEDIA */
+.ensiklopedia-box { background: #fff; border: 3px solid #8B4513; border-radius: 12px; padding: 14px 16px; margin: 10px 0;
+  text-align: left; box-shadow: inset 0 0 20px rgba(255,215,0,0.1); }
+.ensiklopedia-section { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px dashed #FFE0B2; }
+.ensiklopedia-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.ensiklopedia-section h3 { font-family: 'Poppins', sans-serif; color: #8B0000; font-size: 13px; font-weight: 700;
+  margin-bottom: 8px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(90deg, rgba(255,215,0,0.25), transparent); padding: 6px 10px; border-radius: 6px;
+  border-left: 4px solid #FFD700; }
+.ensiklopedia-section p { color: #3E2723; font-size: 12px; line-height: 1.6; margin-bottom: 6px; font-weight: 500; text-align: justify; }
+.ensiklopedia-section ul { padding-left: 20px; margin: 6px 0; }
+.ensiklopedia-section li { color: #3E2723; font-size: 12px; line-height: 1.6; margin-bottom: 5px; font-weight: 500; }
+.ensiklopedia-section.fakta { background: linear-gradient(180deg, #E8F5E9, #C8E6C9); border: 2px solid #2E7D32;
+  border-radius: 8px; padding: 10px 12px; border-left: 5px solid #2E7D32; }
+.ensiklopedia-section.fakta h3 { background: none; border: none; padding: 0; color: #1B5E20; margin-bottom: 6px; }
+.ensiklopedia-section.fakta li { color: #1B5E20; }
+
+/* QUIZ */
+.quiz-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px 14px;
+  background: linear-gradient(90deg, rgba(139,0,0,0.15), rgba(255,215,0,0.2), rgba(139,0,0,0.15)); border-radius:10px;
+  border:2px solid #FFD700; }
+.quiz-header .q-num { font-size:12px; font-weight:600; color:#8B0000; letter-spacing:0.3px; }
+.quiz-header .q-score { font-size:12px; font-weight:600; color:#2E7D32; }
+.quiz-question { font-size:15px; font-weight:600; color:#8B0000; margin:12px 0; line-height:1.5; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-option { font-family: 'Poppins', sans-serif; padding:12px; background:#fff; border:2px solid #8B4513; border-radius:10px;
+  cursor:pointer; font-size:13px; color:#5D4037; transition: all 0.2s; text-align:left; font-weight:500; }
+.quiz-option:hover:not(:disabled) { background:#FFD700; color:#8B0000; transform: translateX(5px); border-color:#FFA000; }
+.quiz-option.correct { background:#66BB6A; color:#fff; border-color:#2E7D32; }
+.quiz-option.wrong { background:#EF5350; color:#fff; border-color:#C62828; }
+.quiz-option:disabled { cursor:not-allowed; transform:none; }
+.quiz-progress-bar { width:100%; height:8px; background:#FFE0B2; border-radius:4px; overflow:hidden; margin-bottom:10px; border:1px solid #8B4513; }
+.quiz-progress-fill { height:100%; background: linear-gradient(90deg, #FFD700, #FF6347); width:0%; transition: width 0.3s; }
+.result-emoji { font-size:60px; margin-bottom:10px; }
+.result-title { font-family: 'Bangers', cursive; color:#8B0000; font-size:28px; font-weight:400; margin-bottom:8px; letter-spacing:2px; }
+.result-score { font-size:32px; font-weight:700; color:#2E7D32; margin:10px 0; }
+.result-detail { font-size:13px; color:#5D4037; margin-bottom:8px; font-weight:500; }
+.result-stars { font-size:36px; letter-spacing:6px; margin:12px 0; filter: drop-shadow(0 4px 8px rgba(255,215,0,0.5)); }
+
+.house-illustration { width:100%; height:180px; background: linear-gradient(180deg, #87CEEB 0%, #FFE4B5 60%, #90EE90 100%);
+  border-radius:10px; margin:8px 0; display:flex; align-items:flex-end; justify-content:center; position:relative;
+  overflow:hidden; border:2px solid #8B4513; }
+.house-info-box { background:#fff; border:2px solid #8B4513; border-radius:8px; padding:10px; text-align:left; margin:8px 0; }
+.house-info-box .info-row { display:flex; margin-bottom:4px; font-size:12px; font-weight:500; }
+.house-info-box .info-label { font-weight:700; color:#8B0000; min-width:80px; }
+.house-info-box .info-value { color:#5D4037; flex:1; }
+
+/* COLLECTION */
+.collection-grid { flex:1; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: min-content; gap: 10px; padding: 12px 14px;
+  overflow-y: auto; background: radial-gradient(ellipse at top, #FFF3C4 0%, transparent 60%), linear-gradient(180deg, #FFF8E1 0%, #FFE0B2 100%); }
+.collection-card { font-family: 'Poppins', sans-serif; background: linear-gradient(180deg, #FFFFFF, #FFF3E0);
+  border: 3px solid #8B4513; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 4px 0 #5D4037, 0 6px 12px rgba(0,0,0,0.25); aspect-ratio: 4 / 3; max-height: 175px;
+  display: flex; flex-direction: column; position: relative; }
+.collection-card:hover:not(.locked) { transform: translateY(-4px); border-color: #FFD700; box-shadow: 0 8px 0 #5D4037, 0 10px 18px rgba(0,0,0,0.35); }
+.collection-card.locked { background: linear-gradient(180deg, #ECEFF1, #CFD8DC); cursor: not-allowed; filter: grayscale(0.4); }
+.collection-card .mini-house { display: block; width: 100%; flex: 1; min-height: 0; background: linear-gradient(180deg, #87CEEB 0%, #FFE4B5 60%, #90EE90 100%); border-bottom: 2px solid #8B4513; }
+.collection-card.locked .lock-icon { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 50px; opacity: 0.5; }
+.collection-card .house-info-wrap { padding: 6px 6px 8px; background: #fff; flex-shrink: 0; text-align: center; }
+.collection-card .house-name { font-size: 10px; font-weight: 700; color: #8B0000; line-height: 1.2; margin-bottom: 2px; }
+.collection-card .house-region { font-size: 8px; color: #5D4037; font-weight: 500; font-style: italic; line-height: 1.2; }
+.collection-card .house-region::before { content: '📍 '; font-style: normal; }
+
+/* ACHIEVEMENT */
+.achievement-list { flex:1; padding:20px; overflow-y:auto; background: radial-gradient(ellipse at top, #FFF3C4 0%, transparent 60%), linear-gradient(180deg, #FFF8E1 0%, #FFE0B2 100%);
+  display:flex; flex-direction:column; gap:12px; }
+.achievement-item { font-family: 'Poppins', sans-serif; display:flex; align-items:center; gap:14px; padding:14px;
+  background:#fff; border:3px solid #8B4513; border-radius:12px; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+.achievement-item.unlocked { background: linear-gradient(90deg, #E8F5E9, #A5D6A7); border-color:#2E7D32; box-shadow: 0 3px 8px rgba(46,125,50,0.3); }
+.achievement-item.locked { opacity:0.6; filter: grayscale(0.5); }
+.achievement-icon { font-size:34px; min-width:44px; text-align:center; }
+.achievement-info { flex:1; text-align:left; }
+.achievement-name { font-size:14px; font-weight:700; color:#8B0000; margin-bottom:2px; }
+.achievement-desc { font-size:11px; color:#5D4037; font-weight:500; }
+.achievement-status { font-size:20px; }
+
+/* TOAST */
+#toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #FFD700;
+  padding: 10px 22px; border-radius: 12px; border: 2px solid #FFD700; font-weight: 600; z-index: 200; opacity: 0;
+  pointer-events: none; transition: opacity 0.3s; font-size: 13px; font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.3px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+#errorBox { display: none; position: absolute; bottom: 10px; left: 10px; right: 10px; background: #B71C1C; color: #fff;
+  padding: 10px; font-size: 12px; z-index: 999; border-radius: 6px; font-family: monospace; word-break: break-all; }
+
+/* EFEK HADIAH */
+#prizeExplosion { position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, rgba(255,215,0,0.95), rgba(255,100,0,0.85), rgba(139,0,0,0.9));
+  display: none; align-items: center; justify-content: center; z-index: 500; pointer-events: none; overflow: hidden; }
+#prizeExplosion.show { display: flex; }
+.chest-center { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); font-size: 140px;
+  filter: drop-shadow(0 0 40px #FFD700); animation: chestOpen 2.4s ease-out forwards; z-index: 10; }
+@keyframes chestOpen {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+  35% { transform: translate(-50%, -50%) scale(1.1) rotate(-3deg); }
+  50% { transform: translate(-50%, -50%) scale(1.15) rotate(3deg); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; } }
+.prize-item { position: absolute; font-size: 70px; top: 55%; left: 50%;
+  filter: drop-shadow(0 0 20px #FFD700) drop-shadow(0 4px 8px rgba(0,0,0,0.4)); opacity: 0; z-index: 5; }
+.prize-item.i1 { animation: itemPop1 2.4s ease-out forwards; }
+.prize-item.i2 { animation: itemPop2 2.4s ease-out forwards; }
+.prize-item.i3 { animation: itemPop3 2.4s ease-out forwards; }
+.prize-item.i4 { animation: itemPop4 2.4s ease-out forwards; }
+.prize-item.i5 { animation: itemPop5 2.4s ease-out forwards; }
+.prize-item.i6 { animation: itemPop6 2.4s ease-out forwards; }
+@keyframes itemPop1 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(-250%,-180%) scale(1) rotate(-20deg);opacity:1} }
+@keyframes itemPop2 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(-120%,-230%) scale(1) rotate(15deg);opacity:1} }
+@keyframes itemPop3 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(20%,-240%) scale(1) rotate(-10deg);opacity:1} }
+@keyframes itemPop4 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(150%,-220%) scale(1) rotate(18deg);opacity:1} }
+@keyframes itemPop5 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(280%,-170%) scale(1) rotate(-15deg);opacity:1} }
+@keyframes itemPop6 { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 30%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(-50%,-300%) scale(1) rotate(0deg);opacity:1} }
+.prize-text { position: absolute; top: 82%; left: 50%; transform: translateX(-50%);
+  font-family: 'Bangers', cursive; color: #FFD700; font-size: 42px; font-weight: 400;
+  text-shadow: 3px 3px 0 #8B0000, 6px 6px 20px rgba(0,0,0,0.8); letter-spacing: 4px;
+  animation: prizeText 2.4s ease-out forwards; white-space: nowrap; }
+@keyframes prizeText {
+  0%, 20% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+  40% { opacity: 1; transform: translateX(-50%) scale(1.25); }
+  70% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); } }
+.confetti { position: fixed; width: 12px; height: 12px; z-index: 501; pointer-events: none;
+  animation: confettiFall 2.5s linear forwards; }
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background:#FFE0B2; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #FFD700, #8B4513); border-radius:4px; }
+
+/* ===== RESPONSIVE MOBILE ===== */
+@media (max-width: 950px), (max-height: 600px) {
+  #gameWrap { border-radius: 0; border-width: 2px; }
+}
+
+@media (max-width: 768px) {
+  .side-menu { width: 260px; padding: 15px 12px; }
+  .sm-title { font-size: 22px; letter-spacing: 1px; }
+  .sm-sub { font-size: 11px; letter-spacing: 2px; }
+  .sm-tagline { font-size: 9px; }
+  .side-btn { padding: 10px 12px; font-size: 11px; }
+  .side-btn.primary { font-size: 12px; padding: 12px; }
+  .sb-icon { font-size: 18px; min-width: 24px; }
+  .pinang-big { left: 28%; }
+  .pinang-trunk { height: 240px; }
+  .level-grid { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px; }
+  .collection-grid { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px; }
+  .level-card { max-height: 130px; }
+  .collection-card { max-height: 150px; }
+  .mobile-controls { display: flex; }
+  .hud-time { font-size:11px; min-width:65px; }
+  .hud-progress-bar { width:60px; }
+  .screen-title { font-size:16px; }
+  .popup { padding: 14px; }
+  .popup h2 { font-size: 22px; }
+}
+@media (max-width: 480px) {
+  .side-menu { width: 200px; padding: 12px 10px; }
+  .sm-title { font-size: 18px; letter-spacing: 1px; }
+  .sm-sub { font-size: 9px; letter-spacing: 1px; }
+  .sm-tagline { display: none; }
+  .side-btn { font-size: 10px; padding: 8px 10px; letter-spacing: 0.3px; }
+  .side-btn.primary { font-size: 11px; padding: 10px; }
+  .sb-icon { font-size: 16px; min-width: 20px; }
+  .pinang-big { left: 22%; }
+  .pinang-trunk { height: 200px; }
+  .hud-progress-bar { width:45px; }
+  .ctrl-btn { width:50px; height:50px; font-size:18px; }
+  .level-grid { grid-template-columns: repeat(2,1fr); }
+  .collection-grid { grid-template-columns: repeat(2,1fr); }
+  .level-card { max-height: 120px; }
+  .collection-card { max-height: 140px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ROTATE HINT -->
+  <div class="rotate-hint">
+    <div class="rotate-hint-icon">📱</div>
+    <div class="rotate-hint-text">Putar HP ke Mode Landscape</div>
+    <div class="rotate-hint-sub">Miringkan HP untuk pengalaman bermain terbaik</div>
+  </div>
+
+  <div id="gameWrap">
+
+    <!-- HOME -->
+    <div class="screen active" id="screenHome">
+      <div class="scene-bg">
+        <div class="sun-day"></div>
+        <div class="cloud-day cd1"></div>
+        <div class="cloud-day cd2"></div>
+        <div class="cloud-day cd3"></div>
+
+        <div class="hill-bg">
+          <svg viewBox="0 0 900 100" preserveAspectRatio="none">
+            <path d="M0,100 L0,70 Q150,30 300,60 T600,50 T900,65 L900,100 Z" fill="#81C784" opacity="0.7"/>
+            <path d="M0,100 L0,80 Q200,50 400,75 T900,80 L900,100 Z" fill="#66BB6A" opacity="0.85"/>
+          </svg>
+        </div>
+
+        <div class="trees-row">
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+          <div class="tree"><div class="tree-leaf"></div><div class="tree-trunk"></div></div>
+        </div>
+
+        <div class="house-row">
+          <svg class="house-mini" width="60" height="45" viewBox="0 0 60 45">
+            <rect x="8" y="22" width="44" height="20" fill="#A1887F"/>
+            <path d="M2,22 L10,8 L30,4 L50,8 L58,22 Z" fill="#D32F2F"/>
+            <path d="M4,22 L12,10 L30,6 L48,10 L56,22" stroke="#B71C1C" stroke-width="1.5" fill="none"/>
+            <rect x="25" y="32" width="10" height="10" fill="#5D4037"/>
+          </svg>
+          <svg class="house-mini" width="60" height="45" viewBox="0 0 60 45">
+            <rect x="10" y="25" width="40" height="17" fill="#A1887F"/>
+            <path d="M5,25 L20,12 L40,12 L55,25 Z" fill="#4E342E"/>
+            <path d="M15,12 L25,3 L35,3 L45,12 Z" fill="#5D4037"/>
+            <rect x="26" y="32" width="8" height="10" fill="#3E2723"/>
+          </svg>
+          <svg class="house-mini" width="60" height="45" viewBox="0 0 60 45">
+            <rect x="10" y="25" width="40" height="17" fill="#8D6E63"/>
+            <path d="M4,25 Q18,8 30,10 Q42,8 56,25 Z" fill="#4E342E"/>
+            <rect x="26" y="30" width="8" height="12" fill="#3E2723"/>
+          </svg>
+          <svg class="house-mini" width="70" height="40" viewBox="0 0 70 40">
+            <rect x="3" y="18" width="64" height="15" fill="#8D6E63"/>
+            <path d="M0,18 L15,5 L55,5 L70,18 Z" fill="#4E342E"/>
+            <rect x="10" y="33" width="3" height="7" fill="#3E2723"/>
+            <rect x="35" y="33" width="3" height="7" fill="#3E2723"/>
+            <rect x="57" y="33" width="3" height="7" fill="#3E2723"/>
+          </svg>
+          <svg class="house-mini" width="60" height="45" viewBox="0 0 60 45">
+            <rect x="10" y="25" width="40" height="17" fill="#A1887F"/>
+            <path d="M0,25 Q20,0 30,5 Q40,0 60,25 L50,25 Q35,12 30,14 Q25,12 10,25 Z" fill="#4E342E"/>
+            <path d="M8,25 L2,15 L6,14 L12,25 Z" fill="#3E2723"/>
+            <path d="M52,25 L58,15 L54,14 L48,25 Z" fill="#3E2723"/>
+            <rect x="26" y="32" width="8" height="10" fill="#3E2723"/>
+          </svg>
+          <svg class="house-mini" width="45" height="45" viewBox="0 0 45 45">
+            <ellipse cx="22" cy="35" rx="18" ry="9" fill="#A1887F"/>
+            <path d="M4,35 L22,5 L40,35 Z" fill="#8D6E63"/>
+            <path d="M18,35 L22,10 M26,35 L22,10" stroke="#5D4037" stroke-width="0.8" fill="none"/>
+            <rect x="20" y="32" width="5" height="8" fill="#3E2723"/>
+          </svg>
+        </div>
+
+        <div class="ground-day"></div>
+
+        <div class="grass-tufts">
+          <div class="grass-tuft" style="left: 8%;"></div>
+          <div class="grass-tuft" style="left: 18%;"></div>
+          <div class="grass-tuft" style="left: 32%;"></div>
+          <div class="grass-tuft" style="left: 55%;"></div>
+          <div class="grass-tuft" style="left: 68%;"></div>
+          <div class="grass-tuft" style="left: 82%;"></div>
+          <div class="grass-tuft" style="left: 92%;"></div>
+        </div>
+
+        <div class="crowd-day">
+          <div class="person-day pd1"></div>
+          <div class="person-day pd2"></div>
+          <div class="person-day pd3"></div>
+          <div class="person-day pd4"></div>
+          <div class="person-day pd5"></div>
+          <div class="person-day pd6"></div>
+          <div class="person-day pd7"></div>
+          <div class="person-day pd8"></div>
+        </div>
+
+        <div class="pinang-big">
+          <div class="pinang-leaves">
+            <div class="pl pl1"></div>
+            <div class="pl pl2"></div>
+            <div class="pl pl3"></div>
+            <div class="pl pl4"></div>
+            <div class="pl pl5"></div>
+            <div class="pl pl6"></div>
+            <div class="pl pl7"></div>
+          </div>
+          <div class="pinang-trunk">
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+            <div class="trunk-ring"></div>
+          </div>
+          <div class="prize-top">
+            <div class="prize-flag">🎁</div>
+            <div class="prize-flag f2">🪙</div>
+            <div class="prize-flag f3">🏆</div>
+          </div>
+          <div class="climber-day">
+            <div class="cl-head-day"></div>
+            <div class="cl-body-day"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="top-icons">
+        <button class="icon-btn" id="btnSoundHome" title="Suara">🔊</button>
+        <button class="icon-btn" id="btnInfoHome" title="Info">ℹ️</button>
+      </div>
+
+      <div class="side-menu">
+        <div class="side-menu-header">
+          <div class="sm-title">PANJAT PINANG</div>
+          <div class="sm-sub">PETUALANGAN RUMAH ADAT</div>
+          <div class="sm-tagline">Panjat, Jelajah, Kenali Rumah Adat Indonesia</div>
+        </div>
+        <div class="side-menu-body">
+          <button class="side-btn primary" id="btnPlay"><span class="sb-icon">▶</span><span class="sb-text">MULAI BERMAIN</span></button>
+          <button class="side-btn" id="btnHowTo"><span class="sb-icon">❓</span><span class="sb-text">CARA BERMAIN</span></button>
+          <button class="side-btn" id="btnCollection"><span class="sb-icon">📚</span><span class="sb-text">KOLEKSI RUMAH</span></button>
+          <button class="side-btn" id="btnAchievement"><span class="sb-icon">🏆</span><span class="sb-text">PENCAPAIAN</span></button>
+        </div>
+        <div class="side-menu-footer">
+          <div class="sm-footer-text">🇮🇩 30 Rumah Adat Nusantara</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL SELECT -->
+    <div class="screen" id="screenLevel">
+      <div class="screen-header">
+        <button class="back-btn" id="btnBackLevel">← KEMBALI</button>
+        <div class="screen-title">🏠 PILIH RUMAH ADAT</div>
+        <div style="width:70px"></div>
+      </div>
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
+
+    <!-- COLLECTION -->
+    <div class="screen" id="screenCollection">
+      <div class="screen-header">
+        <button class="back-btn" id="btnBackCollection">← KEMBALI</button>
+        <div class="screen-title">📚 KOLEKSI RUMAH ADAT</div>
+        <div style="width:70px"></div>
+      </div>
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+
+    <!-- ACHIEVEMENT -->
+    <div class="screen" id="screenAchievement">
+      <div class="screen-header">
+        <button class="back-btn" id="btnBackAchievement">← KEMBALI</button>
+        <div class="screen-title">🏆 PENCAPAIAN</div>
+        <div style="width:70px"></div>
+      </div>
+      <div class="achievement-list" id="achievementList"></div>
+    </div>
+
+    <!-- GAME -->
+    <div class="screen" id="screenGame">
+      <canvas id="gameCanvas" width="900" height="540"></canvas>
+      <div class="hud">
+        <div class="hud-left">
+          <div class="hud-level" id="hudLevel">LEVEL 1 - ACEH</div>
+          <div class="hud-score">SCORE: <span id="hudScore">0000</span></div>
+        </div>
+        <div class="hud-center">
+          <div class="hud-time" id="hudTime">⏱ 01:30</div>
+          <div class="hud-progress-wrap">
+            <div class="hud-progress-label">PROGRESS</div>
+            <div class="hud-progress-bar"><div class="hud-progress-fill" id="hudProgressFill"></div></div>
+            <div class="hud-progress-text" id="hudProgressText">0%</div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-lives" id="hudLives">❤️❤️❤️</div>
+          <button class="hud-pause-btn" id="btnPause">Ⅱ PAUSE</button>
+        </div>
+      </div>
+      <div class="mobile-controls">
+        <div class="ctrl-group"><button class="ctrl-btn" id="btnLeft">◀</button><button class="ctrl-btn" id="btnRight">▶</button></div>
+        <div class="ctrl-group"><button class="ctrl-btn" id="btnUp">▲</button></div>
+      </div>
+    </div>
+
+    <!-- POPUPS -->
+    <div class="popup-overlay" id="popupHowTo">
+      <div class="popup">
+        <div class="popup-emoji">📖</div>
+        <h2>CARA BERMAIN</h2>
+        <ol class="how-to-list">
+          <li>Mulai dari bawah pohon pinang.</li>
+          <li>Tekan ▲ / SPASI untuk memanjat naik.</li>
+          <li>Tekan ◀ / ▶ untuk pindah sisi pohon.</li>
+          <li>Hindari ranting & burung — pindah sisi untuk menghindar!</li>
+          <li>Kumpulkan koin 🪙 dan bintang ⭐.</li>
+          <li>Capai puncak sebelum waktu habis!</li>
+          <li>Setelah selesai: pelajari <b>materi rumah adat</b> dan jawab <b>3 quiz</b>.</li>
+        </ol>
+        <div class="control-info">
+          <b>⌨ Keyboard:</b> ← → pindah sisi, SPACE / ↑ panjat<br>
+          <b>📱 HP:</b> tombol ◀ ▲ ▶ di bawah
+        </div>
+        <div class="popup-buttons"><button class="popup-btn gold" id="btnHowToClose">MENGERTI</button></div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupPause">
+      <div class="popup">
+        <div class="popup-emoji">⏸️</div>
+        <h2>GAME DIJEDA</h2>
+        <div class="popup-buttons" style="flex-direction:column; align-items:stretch;">
+          <button class="popup-btn green" id="btnResume">▶ LANJUTKAN</button>
+          <button class="popup-btn blue" id="btnRestart">🔄 ULANGI</button>
+          <button class="popup-btn" id="btnQuit">🏠 KELUAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupGameOver">
+      <div class="popup">
+        <div class="popup-emoji">💀</div>
+        <h2>GAME OVER</h2>
+        <p id="gameOverReason">Nyawa habis!</p>
+        <div class="house-info-box">
+          <div class="info-row"><span class="info-label">Skor:</span><span class="info-value" id="gameOverScore">0</span></div>
+          <div class="info-row"><span class="info-label">Koin:</span><span class="info-value" id="gameOverCoins">0</span></div>
+          <div class="info-row"><span class="info-label">Level:</span><span class="info-value" id="gameOverLevel">1</span></div>
+        </div>
+        <div class="popup-buttons">
+          <button class="popup-btn green" id="btnRetry">🔄 COBA LAGI</button>
+          <button class="popup-btn blue" id="btnGoMenu">🏠 MENU UTAMA</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupLevelComplete">
+      <div class="popup">
+        <div class="popup-emoji">🎉</div>
+        <h2>LEVEL SELESAI!</h2>
+        <p>Kamu berhasil mencapai puncak!</p>
+        <p style="font-size:18px; font-weight:bold; color:#2E7D32;" id="levelCompletePoints">+700 POINT</p>
+        <div class="popup-buttons"><button class="popup-btn gold" id="btnShowMateri">📖 BUKA MATERI & QUIZ</button></div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupMateri">
+      <div class="popup">
+        <div class="popup-emoji">📖</div>
+        <h2>MATERI RUMAH ADAT</h2>
+        <p style="font-size:12px; color:#8D6E63; margin-bottom:4px; font-weight:700;" id="materiRegion">ACEH</p>
+        <p style="font-size:18px; font-weight:700; color:#8B0000; margin-bottom:8px;" id="materiName">RUMAH KRONG BADE</p>
+        <div class="house-illustration" id="materiIllustration"></div>
+        <div class="materi-box" id="materiContent"></div>
+        <div class="popup-buttons"><button class="popup-btn green" id="btnStartQuizFromMateri">📝 MULAI QUIZ (3 SOAL)</button></div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupQuiz">
+      <div class="popup">
+        <div class="popup-emoji">📝</div>
+        <h2>QUIZ RUMAH ADAT</h2>
+        <div class="quiz-header">
+          <span class="q-num" id="quizNumLabel">Soal 1 / 3</span>
+          <span class="q-score" id="quizScoreLabel">Benar: 0</span>
+        </div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+        <div class="quiz-question" id="quizQuestion">Pertanyaan...</div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="popup-buttons" id="quizNextBtnWrap" style="display:none;">
+          <button class="popup-btn gold" id="btnQuizNext">LANJUT ➡</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupQuizResult">
+      <div class="popup">
+        <div class="result-emoji" id="resultEmoji">🎉</div>
+        <div class="result-title" id="resultTitle">SEMPURNA!</div>
+        <div class="result-score" id="resultScore">3 / 3</div>
+        <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+        <div class="result-detail" id="resultDetail">Kamu sudah memahami rumah adat ini dengan baik!</div>
+        <div class="house-info-box">
+          <div class="info-row"><span class="info-label">Bonus Skor:</span><span class="info-value" id="resultBonus">+300</span></div>
+        </div>
+        <div class="popup-buttons" id="resultButtons"><button class="popup-btn green" id="btnResultContinue">LANJUT ➡</button></div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupEnsiklopedia">
+      <div class="popup" style="max-width: 650px;">
+        <div class="popup-emoji">📚</div>
+        <h2>ENSIKLOPEDIA RUMAH ADAT</h2>
+        <p style="font-size:12px; color:#8D6E63; margin-bottom:4px; font-weight:600;" id="ensiklopediaRegion">ACEH</p>
+        <p style="font-size:20px; font-weight:700; color:#8B0000; margin-bottom:10px;" id="ensiklopediaName">RUMAH KRONG BADE</p>
+        <div class="house-illustration" id="ensiklopediaIllustration"></div>
+        <div class="ensiklopedia-box" id="ensiklopediaContent"></div>
+        <div class="popup-buttons"><button class="popup-btn gold" id="btnCloseEnsiklopedia">✔ TUTUP</button></div>
+      </div>
+    </div>
+
+    <div class="popup-overlay" id="popupAllComplete">
+      <div class="popup">
+        <div class="popup-emoji">🏆</div>
+        <h2>SELAMAT!</h2>
+        <p>Kamu telah menyelesaikan semua 30 level!</p>
+        <p style="font-size:14px; font-weight:bold; color:#8B0000;">Penjelajah Nusantara Sejati! 🇮🇩</p>
+        <div class="popup-buttons"><button class="popup-btn gold" id="btnAllCompleteClose">🏠 MENU UTAMA</button></div>
+      </div>
+    </div>
+
+    <div id="prizeExplosion"></div>
+    <div id="toast"></div>
+    <div id="errorBox"></div>
+
+  </div>
+</div>
+
+<script>
+window.addEventListener('error', function(e){
+  var eb = document.getElementById('errorBox');
+  if (eb) { eb.style.display = 'block'; eb.textContent = 'ERROR: ' + e.message; }
+});
+
+/* ============ DATA 30 RUMAH ADAT ============ */
+var LEVELS = [
+{id:1,region:"Nanggroe Aceh Darussalam",house:"Rumah Krong Bade",time:100,difficulty:1,skyTop:"#87CEEB",skyBottom:"#B0E0E6",
+materi:["<b>Rumah Krong Bade</b> adalah rumah adat Aceh berbentuk <span class='highlight'>rumah panggung</span> memanjang dari timur ke barat.","Pintu masuknya rendah dan dihiasi ukiran.","Tangga masuk berjumlah <b>ganjil</b> — dianggap sakral.","Atapnya panjang dan tinggi dari daun rumbia.","Di bagian bawah ada kolong untuk ternak."],
+facts:"Arah rumah timur-barat mengikuti arah <b>kiblat</b>.",
+ensiklopedia:{sejarah:"Rumah adat Aceh sejak masa Kesultanan Aceh Darussalam (abad 16). Dihuni bangsawan dan jadi pusat kegiatan adat serta keagamaan.",
+ciri:"Rumah panggung dengan kolong 2,5 meter. Atap memanjang utara-selatan dengan ujung melengkung. Pintu rendah agar tamu menunduk. Tangga berjumlah ganjil (5, 7, atau 9 anak tangga) dianggap sakral. Ukiran geometris dan flora berwarna merah, hitam, kuning.",
+fakta:["Krong Bade terbesar ada di Museum Aceh, Banda Aceh — berumur 200 tahun.","Tahan tsunami 2004 karena dibangun tanpa paku.","Tamu tidak boleh masuk lewat tangga belakang."]},
+quiz:[{q:"Krong Bade adalah rumah adat dari...",options:["Aceh","Batak","Minang","Bugis"],answer:0},{q:"Tangga Krong Bade berjumlah...",options:["Genap","Ganjil","Tiga","Lima"],answer:1},{q:"Bentuk Krong Bade adalah...",options:["Kubah","Rumah panggung","Kerucut","Limas"],answer:1}]},
+{id:2,region:"Sumatera Utara",house:"Rumah Bolon",time:100,difficulty:1.05,skyTop:"#87CEEB",skyBottom:"#B0E0E6",
+materi:["<b>Rumah Bolon</b> adalah rumah adat suku <span class='highlight'>Batak</span>.","Namanya berarti 'rumah besar'.","Berbentuk rumah panggung dengan tiang kayu keras.","Atap melengkung seperti pelana.","Dihiasi ukiran cicak, ular, dan tanduk kerbau."],
+facts:"Ukiran cicak di Rumah Bolon melambangkan <b>kehidupan</b>.",
+ensiklopedia:{sejarah:"Rumah adat Batak Toba sejak abad 14. Hanya boleh dihuni raja atau bangsawan (hula-hula).",
+ciri:"Rumah panggung, tiang kayu ungil, tanpa paku. Atap melengkung seperti pelana kerbau dengan kemiringan 45°. Dinding dihiasi ukiran cicak, ular, dan tanduk kerbau. Warna merah-hitam-putih melambangkan tiga alam.",
+fakta:["Berumur 300 tahun, masih berdiri di Samosir.","Tahan gempa karena tanpa paku.","Kolong rumah dianggap sakral."]},
+quiz:[{q:"Rumah Bolon adalah rumah adat suku...",options:["Minang","Batak","Dayak","Bugis"],answer:1},{q:"Arti 'Bolon' adalah...",options:["Kecil","Besar","Panggung","Tinggi"],answer:1},{q:"Motif ukiran Rumah Bolon adalah...",options:["Burung","Cicak","Bunga","Naga"],answer:1}]},
+{id:3,region:"Sumatera Barat",house:"Rumah Gadang",time:100,difficulty:1.1,skyTop:"#87CEEB",skyBottom:"#B0E0E6",
+materi:["<b>Rumah Gadang</b> adalah rumah adat suku <span class='highlight'>Minangkabau</span>.","Atapnya melengkung seperti tanduk kerbau (disebut <i>Gonjong</i>).","Berbentuk rumah panggung dengan tiang kokoh.","Ada rangkiang (lumbung padi) di halaman.","Menjadi simbol kebesaran keluarga Minang."],
+facts:"Atap Gonjong terkait legenda <b>kemenangan Minang atas kerbau</b>.",
+ensiklopedia:{sejarah:"Rumah adat Minangkabau sejak abad 16, seiring Kerajaan Pagaruyung. Simbol budaya matrilineal.",
+ciri:"Rumah panggung, atap melengkung tajam seperti tanduk kerbau (gonjong). Dinding dihiasi ukiran motif tumbuhan. Jumlah ruang dan gonjong selalu ganjil — dianggap sakral.",
+fakta:["Bisa bertahan 200 tahun karena ijuk atapnya antirayap.","Rumah Gadang tertinggi punya 17 gonjong.","Jumlah kamar selalu ganjil."]},
+quiz:[{q:"Rumah Gadang berasal dari...",options:["Aceh","Sumatera Barat","Jambi","Riau"],answer:1},{q:"Nama atap Rumah Gadang adalah...",options:["Joglo","Gonjong","Tongkonan","Bolon"],answer:1},{q:"Rumah Gadang adalah rumah adat suku...",options:["Batak","Dayak","Minangkabau","Bugis"],answer:2}]},
+{id:4,region:"Riau",house:"Rumah Selaso Jatuh Kembar",time:95,difficulty:1.15,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Selaso Jatuh Kembar</b> adalah rumah adat <span class='highlight'>Riau</span>.","Berbentuk rumah panggung dengan dua selasar.","Ada dua tangga di kiri dan kanan.","Dihiasi ukiran khas Melayu.","Menjadi tempat musyawarah adat Melayu."],
+facts:"'Selaso' berarti <b>selasar</b>, 'Jatuh Kembar' artinya <b>dua serambi</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Melayu Riau dari zaman Kesultanan Siak (abad 18).",
+ciri:"Rumah panggung dengan dua selasar di kiri-kanan, masing-masing punya tangga sendiri. Ukiran motif itik sekawan, semut beriring, dan kaluk pakis.",
+fakta:["Rumah di Siak Sri Indrapura pernah jadi istana sementara Sultan Siak.","Dua selasar kembar melambangkan keseimbangan.","Ukiran 'itik sekawan' bermakna kebersamaan."]},
+quiz:[{q:"Rumah Selaso Jatuh Kembar berasal dari...",options:["Riau","Jambi","Aceh","Bengkulu"],answer:0},{q:"Rumah ini memiliki berapa tangga?",options:["1","2","3","4"],answer:1},{q:"Rumah ini adalah rumah adat suku...",options:["Minang","Melayu","Batak","Bugis"],answer:1}]},
+{id:5,region:"Jambi",house:"Rumah Panggung Kajang Lako",time:95,difficulty:1.2,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Panggung Kajang Lako</b> adalah rumah adat <span class='highlight'>Jambi</span>.","Berbentuk rumah panggung dari kayu.","Atapnya dari kajang (anyaman daun).","Ada 8 tiang utama (tiang tuo).","Dihiasi ukiran flora dan fauna."],
+facts:"Rumah ini memiliki 8 tiang utama yang melambangkan <b>8 penjuru mata angin</b>.",
+ensiklopedia:{sejarah:"Rumah adat Jambi dari masa Kesultanan Jambi (abad 17).",
+ciri:"Rumah panggung dengan 8 tiang utama melambangkan 8 penjuru mata angin. Atap dari kajang — anyaman daun nipah atau rumbia.",
+fakta:["Rumah tertua ada di kawasan Candi Muara Jambi.","Atap kajang tahan 30-50 tahun.","Angka 8 melambangkan 8 arah mata angin."]},
+quiz:[{q:"Rumah Kajang Lako berasal dari...",options:["Jambi","Riau","Palembang","Bengkulu"],answer:0},{q:"Atapnya terbuat dari...",options:["Seng","Kajang","Genteng","Kayu"],answer:1},{q:"Jumlah tiang utamanya ada...",options:["4","6","8","10"],answer:2}]},
+{id:6,region:"Sumatera Selatan",house:"Rumah Limas",time:95,difficulty:1.25,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Limas</b> adalah rumah adat <span class='highlight'>Sumatera Selatan</span>.","Atapnya berbentuk limas bertingkat.","Berbentuk rumah panggung.","Ada ukiran khas Palembang.","Menjadi simbol keagungan keluarga."],
+facts:"Tingkat atap melambangkan <b>tingkat kehidupan</b> dalam budaya Palembang.",
+ensiklopedia:{sejarah:"Rumah adat Palembang dari zaman Kesultanan Palembang Darussalam (abad 16-19).",
+ciri:"Rumah panggung dengan atap limas bertingkat (3 atau 5 tingkat). Setiap tingkat melambangkan strata sosial.",
+fakta:["Rumah Limas tertinggi punya 5 tingkat.","Museum Sultan Mahmud Badaruddin II adalah Rumah Limas abad 18.","Ada ukiran 'Bunga Padma' khusus kesultanan."]},
+quiz:[{q:"Rumah Limas berasal dari...",options:["Jambi","Sumatera Selatan","Bengkulu","Lampung"],answer:1},{q:"Bentuk atap Rumah Limas adalah...",options:["Datar","Limas","Kubah","Melengkung"],answer:1},{q:"Rumah Limas adalah rumah adat dari kota...",options:["Padang","Palembang","Jambi","Medan"],answer:1}]},
+{id:7,region:"Bengkulu",house:"Rumah Bubungan Lima",time:95,difficulty:1.25,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Bubungan Lima</b> adalah rumah adat <span class='highlight'>Bengkulu</span>.","Memiliki 5 bubungan atap.","Berbentuk rumah panggung.","Dihiasi ukiran khas Bengkulu.","Menjadi tempat musyawarah masyarakat."],
+facts:"Jumlah bubungan 5 melambangkan <b>5 sila Pancasila</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Rejang dan Melayu Bengkulu sejak abad 17.",
+ciri:"Rumah panggung dengan 5 bubungan atap. Ukiran flora dan geometris. Teras terbuka di depan.",
+fakta:["Rumah Bubungan Lima tempat Bung Karno diasingkan masih berdiri.","5 bubungan atap konon diilhami dari tenda tentara Inggris.","Tahan gempa karena tanpa paku."]},
+quiz:[{q:"Rumah Bubungan Lima berasal dari...",options:["Bengkulu","Lampung","Palembang","Jambi"],answer:0},{q:"Jumlah bubungannya ada...",options:["3","4","5","6"],answer:2},{q:"Rumah ini berbentuk...",options:["Kubah","Rumah panggung","Kerucut","Limas"],answer:1}]},
+{id:8,region:"Lampung",house:"Rumah Nowou Sesat",time:95,difficulty:1.3,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Nowou Sesat</b> adalah rumah adat suku <span class='highlight'>Lampung</span>.","Berbentuk rumah panggung dengan atap tinggi.","Dibuat dari kayu pilihan.","Ada kolong untuk menyimpan hasil tani.","Dihiasi ukiran khas Lampung."],
+facts:"'Nowou Sesat' berarti <b>rumah adat</b> dalam bahasa Lampung.",
+ensiklopedia:{sejarah:"Rumah adat suku Lampung sejak abad 15.",
+ciri:"Rumah panggung dengan atap tinggi menjulang dan kemiringan 45°. Ukiran flora dan geometris. Ada patung kayu kepala kerbau di atas pintu.",
+fakta:["Rumah Nowou Sesat di Lampung Barat berdiri sejak 300 tahun lalu.","Kain Tapis biasanya disimpan di kamar utama.","Atap tinggi berfungsi agar asap dapur cepat keluar."]},
+quiz:[{q:"Rumah Nowou Sesat berasal dari...",options:["Lampung","Bengkulu","Palembang","Jambi"],answer:0},{q:"Rumah Nowou Sesat berbentuk...",options:["Kubah","Rumah panggung","Kerucut","Piramida"],answer:1},{q:"Rumah ini adalah rumah adat suku...",options:["Melayu","Lampung","Minang","Batak"],answer:1}]},
+{id:9,region:"DKI Jakarta",house:"Rumah Kebaya",time:95,difficulty:1.35,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Kebaya</b> adalah rumah adat suku <span class='highlight'>Betawi</span>.","Atapnya melengkung seperti lipatan kebaya.","Ada teras luas (paseban).","Dihiasi gigi balang di atap.","Menjadi lambang keterbukaan Betawi."],
+facts:"Gigi balang melambangkan <b>kejujuran & keteguhan hati</b>.",
+ensiklopedia:{sejarah:"Rumah adat Betawi Jakarta yang muncul abad 18-19.",
+ciri:"Rumah panggung rendah dengan kolong 50-80 cm. Atap melengkung seperti kebaya dengan hiasan gigi balang.",
+fakta:["Rumah Kebaya tertua di Setu Babakan berumur lebih dari 150 tahun.","Gigi balang jumlahnya harus ganjil.","Paseban dipakai untuk menggelar lenong."]},
+quiz:[{q:"Rumah Kebaya adalah rumah adat suku...",options:["Betawi","Sunda","Jawa","Batak"],answer:0},{q:"Mengapa disebut Rumah Kebaya?",options:["Pemiliknya suka kebaya","Atapnya seperti lipatan kebaya","Ada patung kebaya","Catnya warna kebaya"],answer:1},{q:"Hiasan khas di atapnya adalah...",options:["Naga","Gigi balang","Tanduk kerbau","Burung"],answer:1}]},
+{id:10,region:"Jawa Barat",house:"Rumah Julang Ngapak",time:95,difficulty:1.4,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Julang Ngapak</b> adalah rumah adat suku <span class='highlight'>Sunda</span>.","Namanya dari burung julang yang mengapakkan sayap.","Atapnya melebar di kedua sisi.","Berbentuk rumah panggung.","Ada kolong untuk menyimpan hasil tani."],
+facts:"Nama 'Julang Ngapak' dari burung <b>Julang</b> (rangkong).",
+ensiklopedia:{sejarah:"Rumah adat suku Sunda Jawa Barat sejak abad 16, masa Kerajaan Pajajaran.",
+ciri:"Rumah panggung dengan atap melebar di kedua sisi — menyerupai sayap burung julang. Atap lebar berfungsi melindungi dinding.",
+fakta:["Rumah Julang Ngapak di Kampung Naga berumur lebih dari 200 tahun.","Atap melebar melindungi dinding dari hujan.","Burung julang kini dilindungi karena hampir punah."]},
+quiz:[{q:"Rumah Julang Ngapak adalah rumah adat suku...",options:["Jawa","Sunda","Betawi","Batak"],answer:1},{q:"Bentuk atapnya menyerupai...",options:["Tanduk kerbau","Sayap burung","Perahu","Kubah"],answer:1},{q:"Berasal dari provinsi...",options:["Jawa Tengah","Jawa Timur","Jawa Barat","Banten"],answer:2}]},
+{id:11,region:"Jawa Tengah",house:"Rumah Joglo",time:100,difficulty:1.45,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Joglo</b> adalah rumah adat <span class='highlight'>Jawa</span>.","Atap bertingkat dengan puncak (molo).","Ada 4 tiang utama (soko guru).","Ada pendopo, pringgitan, dan omah dalem.","Dibuat dari kayu jati."],
+facts:"Pendopo digunakan untuk <b>pertunjukan wayang</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Jawa dari zaman Kerajaan Mataram Islam (abad 16-17).",
+ciri:"Rumah panggung rendah dengan 4 tiang utama (soko guru) dari kayu jati. Atap bertingkat 2-3 dengan puncak molo. Struktur tumpang tanpa paku.",
+fakta:["Joglo Keraton Yogyakarta punya soko guru dari kayu jati berumur 300 tahun.","Pendopo biasanya tanpa dinding.","Sistem tumpang atap joglo tanpa paku."]},
+quiz:[{q:"Rumah Joglo berasal dari...",options:["Jawa Tengah","Jawa Barat","Jawa Timur","Bali"],answer:0},{q:"4 tiang utama disebut...",options:["Soko Guru","Gonjong","Rangkiang","Tongkonan"],answer:0},{q:"Ruang terbukanya disebut...",options:["Omah Dalem","Pringgitan","Pendopo","Sanggah"],answer:2}]},
+{id:12,region:"DI Yogyakarta",house:"Rumah Joglo Yogyakarta",time:95,difficulty:1.5,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Joglo Yogyakarta</b> adalah variasi rumah Joglo.","Punya pendopo luas untuk pertemuan.","Dihiasi ukiran khas Yogyakarta.","Atapnya lebih tinggi dari Joglo biasa.","Berbahan kayu jati pilihan."],
+facts:"Joglo Yogyakarta menjadi simbol <b>Keraton & kebangsawanan</b>.",
+ensiklopedia:{sejarah:"Variasi khas Joglo di lingkungan Keraton Ngayogyakarta Hadiningrat sejak abad 18.",
+ciri:"Rumah panggung dengan 4 tiang utama dari kayu jati tua. Atap lebih tinggi dari Joglo biasa. Pendopo dilengkapi gamelan lengkap.",
+fakta:["Joglo Bangsal Kencana punya 64 tiang kayu jati tanpa paku.","Joglo Yogyakarta punya gamelan pusaka.","Pendopo adalah tempat Tari Bedhaya Semang ditampilkan."]},
+quiz:[{q:"Rumah Joglo Yogyakarta berasal dari...",options:["Jawa Tengah","DI Yogyakarta","Jawa Timur","Surakarta"],answer:1},{q:"Rumah ini berbahan...",options:["Bambu","Kayu jati","Batu","Seng"],answer:1},{q:"Joglo Yogyakarta melambangkan...",options:["Kesederhanaan","Kebangsawanan","Kekayaan","Kesuburan"],answer:1}]},
+{id:13,region:"Jawa Timur",house:"Rumah Joglo Situbondo",time:95,difficulty:1.5,skyTop:"#87CEEB",skyBottom:"#FFE0B2",
+materi:["<b>Rumah Joglo Situbondo</b> adalah rumah adat <span class='highlight'>Jawa Timur</span>.","Modifikasi Joglo dengan ciri khas sendiri.","Atap lebih landai dari Joglo Jawa Tengah.","Banyak dihuni masyarakat pesisir.","Dihiasi ukiran khas Jawa Timur."],
+facts:"Rumah ini populer di daerah <b>Situbondo</b>, Jawa Timur.",
+ensiklopedia:{sejarah:"Variasi Joglo yang berkembang di pesisir Jawa Timur sejak abad 18.",
+ciri:"Rumah panggung rendah dengan 4 tiang utama. Atap lebih landai — kemiringan 30°. Ukiran flora dan geometris sederhana.",
+fakta:["Atap landai mengurangi terpaan angin laut.","Pendopo sering jadi warung kopi.","Rumah dibangun menghadap ke laut."]},
+quiz:[{q:"Rumah Joglo Situbondo berasal dari...",options:["Jawa Barat","Jawa Tengah","Jawa Timur","Bali"],answer:2},{q:"Ciri khas atapnya...",options:["Lebih tinggi","Lebih landai","Bertingkat","Datar"],answer:1},{q:"Banyak dihuni masyarakat...",options:["Gunung","Pesisir","Hutan","Kota"],answer:1}]},
+{id:14,region:"Bali",house:"Rumah Adat Bali",time:90,difficulty:1.55,skyTop:"#FFB74D",skyBottom:"#FFD54F",
+materi:["<b>Rumah Adat Bali</b> dibangun dengan konsep <span class='highlight'>Tri Hita Karana</span>.","Ada bale, paon, dan sanggah (pura keluarga).","Pintu masuk berupa gapura candi bentar.","Dihiasi ukiran khas Bali.","Ada pura keluarga di sudut timur laut."],
+facts:"Gapura <b>Candi Bentar</b> melambangkan keseimbangan alam.",
+ensiklopedia:{sejarah:"Kompleks rumah tradisional Bali sejak zaman Kerajaan Bedahulu (abad 10).",
+ciri:"Kompleks rumah dibatasi tembok tinggi. Ada gapura candi bentar dan gapura padu raksa. Sanggah (pura keluarga) selalu ada di sudut timur laut.",
+fakta:["Setiap rumah Bali WAJIB punya sanggah.","Gapura candi bentar melambangkan Gunung Agung.","Ijuk untuk atap bertahan 50 tahun."]},
+quiz:[{q:"Gapura candi bentar adalah ciri rumah adat dari...",options:["Papua","Bali","Jawa","Sumatera"],answer:1},{q:"Konsep dasar rumah Bali adalah...",options:["Tri Hita Karana","Soko Guru","Gonjong","Rambu Solo"],answer:0},{q:"Tempat ibadah di rumah Bali disebut...",options:["Paon","Bale","Sanggah","Pendopo"],answer:2}]},
+{id:15,region:"Nusa Tenggara Barat",house:"Rumah Dalam Loka",time:90,difficulty:1.6,skyTop:"#FFB74D",skyBottom:"#FFD54F",
+materi:["<b>Rumah Dalam Loka</b> adalah rumah adat <span class='highlight'>Sumbawa</span>, NTB.","Berbentuk rumah panggung besar.","Punya tangga dengan jumlah ganjil.","Dihiasi ukiran khas Sumbawa.","Menjadi simbol kebesaran Kesultanan Sumbawa."],
+facts:"Rumah Dalam Loka adalah <b>istana Kesultanan Sumbawa</b>.",
+ensiklopedia:{sejarah:"Istana Kesultanan Sumbawa yang dibangun tahun 1885 oleh Sultan Muhammad Jalaluddin Syah III.",
+ciri:"Rumah panggung besar dengan kolong 2 meter. Tiang utama dari kayu jati tua. Struktur tanpa paku. Tangga masuk berjumlah ganjil.",
+fakta:["Istana Dalam Loka sudah berumur 140 tahun.","Tahan gempa besar 2018.","Koleksi istana termasuk keris pusaka."]},
+quiz:[{q:"Rumah Dalam Loka berasal dari...",options:["NTB","NTT","Bali","Lombok"],answer:0},{q:"Rumah ini adalah istana...",options:["Majapahit","Kesultanan Sumbawa","Gowa","Mataram"],answer:1},{q:"Bentuknya adalah...",options:["Kubah","Rumah panggung","Kerucut","Limas"],answer:1}]},
+{id:16,region:"Nusa Tenggara Timur",house:"Rumah Mbaru Niang",time:90,difficulty:1.65,skyTop:"#81D4FA",skyBottom:"#B2EBF2",
+materi:["<b>Mbaru Niang</b> adalah rumah adat suku <span class='highlight'>Manggarai</span> di Flores.","Bentuknya kerucut tinggi.","Berbahan bambu, kayu, dan alang-alang.","Tingginya mencapai 15 meter.","Hanya ada 7 rumah di Desa Wae Rebo."],
+facts:"Mbaru Niang dianggap pusat <b>kehidupan & leluhur</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Manggarai di Desa Wae Rebo, Flores, NTT — sudah ada sejak lebih dari 1.000 tahun.",
+ciri:"Rumah berbentuk kerucut tinggi dengan diameter bawah 8 meter dan tinggi 15 meter. Berbahan bambu, kayu, alang-alang. Ada 5 lantai.",
+fakta:["Hanya ada 7 Mbaru Niang di Wae Rebo.","UNESCO beri penghargaan tahun 2012.","Untuk mencapai Wae Rebo harus trekking 3-4 jam."]},
+quiz:[{q:"Mbaru Niang adalah rumah adat suku...",options:["Dani","Manggarai","Toraja","Dayak"],answer:1},{q:"Bentuknya menyerupai...",options:["Kotak","Kerucut","Setengah lingkaran","Piramida"],answer:1},{q:"Berasal dari provinsi...",options:["NTT","NTB","Maluku","Papua"],answer:0}]},
+{id:17,region:"Kalimantan Barat",house:"Rumah Panjang",time:95,difficulty:1.4,skyTop:"#87CEEB",skyBottom:"#A5D6A7",
+materi:["<b>Rumah Panjang</b> adalah rumah adat suku <span class='highlight'>Dayak</span> di Kalimantan Barat.","Bisa mencapai 200 meter.","Dihuni banyak keluarga.","Berbentuk rumah panggung.","Dihiasi ukiran khas Dayak."],
+facts:"Rumah Panjang juga disebut <b>Rumah Betang</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Dayak Kanayatn, Iban, dan Mualang — sudah ada lebih dari 500 tahun.",
+ciri:"Rumah panggung panjang dengan tinggi kolong 2-3 meter. Tiang dari kayu besi (ulin). Panjang bisa 200 meter. Ukiran besar bermotif burung enggang.",
+fakta:["Rumah Panjang tertua berumur lebih dari 400 tahun.","Satu Rumah Panjang bisa dihuni 40 keluarga.","Burung Enggang kini dilindungi."]},
+quiz:[{q:"Rumah Panjang berasal dari...",options:["Kalimantan Barat","Kalimantan Timur","Kalimantan Selatan","Kalimantan Utara"],answer:0},{q:"Rumah ini disebut juga...",options:["Rumah Lamin","Rumah Betang","Rumah Radakng","Rumah Bubungan"],answer:1},{q:"Rumah Panjang dihuni oleh...",options:["1 keluarga","Banyak keluarga","Raja","Pendeta"],answer:1}]},
+{id:18,region:"Kalimantan Tengah",house:"Rumah Betang",time:95,difficulty:1.45,skyTop:"#87CEEB",skyBottom:"#A5D6A7",
+materi:["<b>Rumah Betang</b> adalah rumah adat suku <span class='highlight'>Dayak Ngaju</span>.","Berbentuk rumah panggung panjang.","Dihuni banyak keluarga dalam satu rumah.","Dihiasi ukiran bermotif tumbuhan dan hewan.","Ada tiang-tiang kayu ulin yang kuat."],
+facts:"Rumah Betang menjadi lambang <b>kebersamaan</b> masyarakat Dayak.",
+ensiklopedia:{sejarah:"Rumah adat suku Dayak Ngaju — sudah ada sejak abad 14.",
+ciri:"Rumah panggung panjang dengan tinggi kolong 2-3 meter. Tiang utama dari kayu ulin. Ukiran motif burung tingang.",
+fakta:["Rumah Betang Tumbang Anoi jadi tempat perdamaian Dayak 1894.","Kayu ulin tiangnya tahan 300 tahun.","Setiap keluarga punya tanggung jawab menjaga lorong."]},
+quiz:[{q:"Rumah Betang adalah rumah adat suku...",options:["Banjar","Dayak Ngaju","Bugis","Melayu"],answer:1},{q:"Rumah Betang dibuat dari kayu...",options:["Jati","Ulin","Meranti","Mahoni"],answer:1},{q:"Rumah Betang melambangkan...",options:["Kekayaan","Kebersamaan","Kekuasaan","Keindahan"],answer:1}]},
+{id:19,region:"Kalimantan Selatan",house:"Rumah Bubungan Tinggi",time:95,difficulty:1.5,skyTop:"#87CEEB",skyBottom:"#A5D6A7",
+materi:["<b>Rumah Bubungan Tinggi</b> adalah rumah adat suku <span class='highlight'>Banjar</span>.","Atapnya tinggi menjulang.","Berbentuk rumah panggung dari kayu ulin.","Ada 3 bagian: surambi, panampik, palidangan.","Dihiasi ukiran khas Banjar."],
+facts:"Kayu <b>ulin</b> sangat kuat sehingga rumah tahan ratusan tahun.",
+ensiklopedia:{sejarah:"Rumah adat suku Banjar dari zaman Kesultanan Banjar (abad 16).",
+ciri:"Rumah panggung dengan kolong 1,5-2 meter. Tiang utama dari kayu ulin. Atap tinggi menjulang sampai 15 meter.",
+fakta:["Rumah Bubungan Tinggi di Desa Kuin berdiri lebih dari 200 tahun.","Kayu ulin tahan lebih dari 300 tahun.","Atap tinggi agar asap dapur cepat keluar."]},
+quiz:[{q:"Rumah Bubungan Tinggi adalah rumah adat suku...",options:["Dayak","Banjar","Bugis","Toraja"],answer:1},{q:"Kayu khas untuk rumah ini...",options:["Jati","Ulin","Meranti","Mahoni"],answer:1},{q:"Teras rumahnya disebut...",options:["Palidangan","Panampik","Surambi","Lamin"],answer:2}]},
+{id:20,region:"Kalimantan Timur",house:"Rumah Lamin",time:95,difficulty:1.5,skyTop:"#87CEEB",skyBottom:"#A5D6A7",
+materi:["<b>Rumah Lamin</b> adalah rumah adat suku <span class='highlight'>Dayak</span> di Kalimantan Timur.","Rumah panjang mencapai 300 meter.","Rumah panggung setinggi 3 meter.","Dihiasi ukiran burung enggang.","Menjadi pusat musyawarah suku Dayak."],
+facts:"Ukiran burung <b>Enggang</b> melambangkan keberanian.",
+ensiklopedia:{sejarah:"Rumah adat suku Dayak Kenyah — sudah ada lebih dari 500 tahun.",
+ciri:"Rumah panggung panjang dengan kolong 3 meter. Panjang sampai 300 meter — salah satu rumah terpanjang di dunia.",
+fakta:["Rumah Lamin terpanjang mencapai 300 meter.","Ukiran burung enggang dibuat dari satu batang kayu.","Untuk membangun butuh 2-3 tahun kerja gotong royong."]},
+quiz:[{q:"Rumah Lamin adalah rumah adat suku...",options:["Minang","Dayak","Bugis","Toraja"],answer:1},{q:"Mengapa disebut rumah panjang?",options:["Atapnya tinggi","Mencapai 300 meter","Banyak tiang","Persegi"],answer:1},{q:"Motif ukirannya adalah...",options:["Tanduk","Burung Enggang","Naga","Bunga"],answer:1}]},
+{id:21,region:"Kalimantan Utara",house:"Rumah Baloy",time:95,difficulty:1.55,skyTop:"#87CEEB",skyBottom:"#A5D6A7",
+materi:["<b>Rumah Baloy</b> adalah rumah adat suku <span class='highlight'>Tidung</span> di Kalimantan Utara.","Berbentuk rumah panggung panjang.","Dihiasi ukiran bermotif alam.","Ada tiang-tiang kayu ulin.","Menjadi tempat musyawarah adat."],
+facts:"Rumah Baloy menjadi ikon <b>Kota Tarakan</b>, Kalimantan Utara.",
+ensiklopedia:{sejarah:"Rumah adat suku Tidung — sudah ada sejak abad 17.",
+ciri:"Rumah panggung panjang dengan kolong 2 meter. Tiang dari kayu ulin. Panjang 30-50 meter. Ukiran bermotif alam.",
+fakta:["Rumah Baloy jadi ikon Kota Tarakan.","Ukiran dibuat pengrajin khusus turun-temurun.","Rumah Baloy asli di Tarakan berumur 200 tahun."]},
+quiz:[{q:"Rumah Baloy adalah rumah adat suku...",options:["Dayak","Tidung","Banjar","Bugis"],answer:1},{q:"Rumah Baloy berasal dari...",options:["Kalimantan Utara","Kalimantan Timur","Kalimantan Barat","Kalimantan Selatan"],answer:0},{q:"Rumah Baloy menjadi ikon kota...",options:["Balikpapan","Tarakan","Samarinda","Pontianak"],answer:1}]},
+{id:22,region:"Sulawesi Utara",house:"Rumah Wale",time:90,difficulty:1.55,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Rumah Wale</b> adalah rumah adat suku <span class='highlight'>Minahasa</span>.","Berbentuk rumah panggung.","Atapnya melengkung dengan tanduk kerbau di puncak.","Dihiasi ukiran khas Minahasa.","Menjadi simbol kebesaran keluarga."],
+facts:"Tanduk kerbau di atap melambangkan <b>keberanian</b> suku Minahasa.",
+ensiklopedia:{sejarah:"Rumah adat suku Minahasa — sudah ada sejak abad 15.",
+ciri:"Rumah panggung dengan kolong 1-1,5 meter. Atap melengkung seperti perahu terbalik. Ada tanduk kerbau di puncak atap.",
+fakta:["Rumah Wale di Woloan, Tomohon, jadi pusat kerajinan rumah kayu.","Tanduk kerbau melambangkan keberanian.","Setiap sub-suku punya variasi Wale masing-masing."]},
+quiz:[{q:"Rumah Wale adalah rumah adat suku...",options:["Bugis","Minahasa","Toraja","Gorontalo"],answer:1},{q:"Rumah Wale berasal dari...",options:["Sulawesi Utara","Sulawesi Tengah","Sulawesi Selatan","Gorontalo"],answer:0},{q:"Yang ada di puncak atap Wale adalah...",options:["Burung","Tanduk kerbau","Bunga","Naga"],answer:1}]},
+{id:23,region:"Gorontalo",house:"Rumah Dulohupa",time:90,difficulty:1.55,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Rumah Dulohupa</b> adalah rumah adat <span class='highlight'>Gorontalo</span>.","Berbentuk rumah panggung.","Atapnya dari daun rumbia.","Dihiasi ukiran khas Gorontalo.","Menjadi tempat musyawarah adat."],
+facts:"'Dulohupa' berarti <b>tempat musyawarah</b> dalam bahasa Gorontalo.",
+ensiklopedia:{sejarah:"Rumah adat Gorontalo sejak zaman Kesultanan Gorontalo (abad 17).",
+ciri:"Rumah panggung dengan atap dari daun rumbia bertumpuk. Warna dominan merah, kuning, hijau.",
+fakta:["Rumah Dulohupa masih jadi tempat upacara adat.","Atap rumbia menahan panas dan hujan.","Bentuknya terbuka agar siapapun bisa masuk."]},
+quiz:[{q:"Rumah Dulohupa berasal dari...",options:["Gorontalo","Sulawesi Utara","Sulawesi Tengah","Sulawesi Barat"],answer:0},{q:"Arti nama Dulohupa adalah...",options:["Rumah besar","Tempat musyawarah","Rumah raja","Tempat tidur"],answer:1},{q:"Atapnya terbuat dari...",options:["Seng","Rumbia","Genteng","Kayu"],answer:1}]},
+{id:24,region:"Sulawesi Tengah",house:"Rumah Tambi",time:90,difficulty:1.6,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Rumah Tambi</b> adalah rumah adat suku <span class='highlight'>Kaili</span> di Sulawesi Tengah.","Berbentuk rumah panggung.","Atapnya tinggi menjulang.","Dihiasi ukiran bermotif alam.","Menjadi simbol kebesaran suku Kaili."],
+facts:"Rumah Tambi menjadi ikon <b>kota Palu</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Kaili — sudah ada sejak abad 16.",
+ciri:"Rumah panggung dengan atap tinggi menjulang. Tiang dari kayu keras. Ukiran flora dan geometris.",
+fakta:["Rumah Tambi jadi ikon Kota Palu.","Struktur tahan gempa karena tanpa paku.","Atap tinggi mengalirkan air hujan dengan cepat."]},
+quiz:[{q:"Rumah Tambi adalah rumah adat suku...",options:["Bugis","Kaili","Toraja","Minahasa"],answer:1},{q:"Rumah Tambi berasal dari...",options:["Sulawesi Tengah","Sulawesi Utara","Sulawesi Selatan","Gorontalo"],answer:0},{q:"Rumah Tambi menjadi ikon kota...",options:["Makassar","Palu","Manado","Gorontalo"],answer:1}]},
+{id:25,region:"Sulawesi Selatan",house:"Tongkonan",time:95,difficulty:1.6,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Tongkonan</b> adalah rumah adat suku <span class='highlight'>Toraja</span>.","Atapnya melengkung seperti perahu.","Di depan dipasang tanduk kerbau.","Menghadap ke utara.","Dibangun tanpa paku."],
+facts:"Tongkonan menjadi pusat <b>upacara Rambu Solo</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Toraja — sudah ada sejak abad 9.",
+ciri:"Rumah panggung dengan atap melengkung seperti perahu. Di depan dipasang tanduk kerbau. Menghadap ke utara (arah suci). Dibangun tanpa paku.",
+fakta:["Tongkonan menghadap ke utara karena utara dianggap arah suci.","Tanduk kerbau menandakan status sosial.","Dibangun tanpa paku tapi tahan gempa."]},
+quiz:[{q:"Tongkonan adalah rumah adat suku...",options:["Toraja","Dayak","Bugis","Minahasa"],answer:0},{q:"Yang dipasang di depan Tongkonan adalah...",options:["Padi","Tanduk kerbau","Bunga","Kain"],answer:1},{q:"Tongkonan menghadap ke arah...",options:["Selatan","Utara","Timur","Barat"],answer:1}]},
+{id:26,region:"Sulawesi Tenggara",house:"Rumah Buton",time:90,difficulty:1.6,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Rumah Buton</b> adalah rumah adat suku <span class='highlight'>Buton</span>.","Berbentuk rumah panggung.","Atapnya limas bertingkat.","Bahan dari kayu jati.","Cerminan budaya maritim suku Buton."],
+facts:"Rumah Buton punya <b>4 tiang utama</b> melambangkan 4 arah mata angin.",
+ensiklopedia:{sejarah:"Rumah adat suku Buton sejak zaman Kesultanan Buton (abad 14-16).",
+ciri:"Rumah panggung dengan atap limas bertingkat. Tiang utama berjumlah 4 — melambangkan 4 arah mata angin. Bahan dari kayu jati.",
+fakta:["Rumah Buton punya 4 tiang utama.","Kayu jati dipilih karena tahan air laut.","Cerminan budaya maritim suku Buton."]},
+quiz:[{q:"Rumah Buton adalah rumah adat suku...",options:["Bugis","Buton","Toraja","Minahasa"],answer:1},{q:"Bentuk atapnya adalah...",options:["Datar","Limas bertingkat","Kubah","Melengkung"],answer:1},{q:"Rumah Buton dari provinsi...",options:["Sulawesi Selatan","Sulawesi Utara","Sulawesi Tenggara","Gorontalo"],answer:2}]},
+{id:27,region:"Sulawesi Barat",house:"Rumah Boyang",time:90,difficulty:1.6,skyTop:"#87CEEB",skyBottom:"#CE93D8",
+materi:["<b>Rumah Boyang</b> adalah rumah adat suku <span class='highlight'>Mandar</span>.","Berbentuk rumah panggung panjang.","Dihuni banyak keluarga.","Dihiasi ukiran khas Mandar.","Menjadi pusat musyawarah adat."],
+facts:"Rumah Boyang juga disebut <b>Rumah Balla To Salama</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Mandar — sudah ada sejak abad 16.",
+ciri:"Rumah panggung panjang dengan kolong 1,5-2 meter. Tiang dari kayu keras. Ukiran flora dan geometris khas Mandar.",
+fakta:["Rumah Boyang disebut juga Rumah Balla To Salama.","Dihuni banyak keluarga.","Ukiran bermotif tumbuhan laut."]},
+quiz:[{q:"Rumah Boyang adalah rumah adat suku...",options:["Bugis","Mandar","Toraja","Kaili"],answer:1},{q:"Rumah Boyang berasal dari...",options:["Sulawesi Barat","Sulawesi Selatan","Sulawesi Tengah","Gorontalo"],answer:0},{q:"Rumah Boyang berbentuk...",options:["Kubah","Rumah panggung panjang","Kerucut","Limas"],answer:1}]},
+{id:28,region:"Maluku",house:"Rumah Baileo",time:90,difficulty:1.65,skyTop:"#81D4FA",skyBottom:"#B2EBF2",
+materi:["<b>Rumah Baileo</b> adalah rumah adat <span class='highlight'>Maluku</span>.","Berbentuk rumah panggung terbuka.","Tidak memiliki dinding — hanya tiang.","Menjadi tempat musyawarah adat.","Atapnya dari daun sagu."],
+facts:"Baileo berarti <b>balai pertemuan</b> — tempat musyawarah masyarakat Maluku.",
+ensiklopedia:{sejarah:"Rumah adat Maluku sejak zaman Kesultanan Ternate dan Tidore (abad 15-16).",
+ciri:"Rumah panggung terbuka tanpa dinding — hanya tiang penyangga. Atap dari daun sagu bertumpuk.",
+fakta:["Baileo berarti balai pertemuan.","Tidak berdinding agar siapapun bisa masuk.","Atap dari daun sagu tahan cuaca laut."]},
+quiz:[{q:"Rumah Baileo berasal dari...",options:["Maluku","Papua","NTT","Sulawesi"],answer:0},{q:"Rumah Baileo berfungsi sebagai...",options:["Rumah tinggal","Balai pertemuan","Istana","Toko"],answer:1},{q:"Ciri unik Baileo adalah...",options:["Tidak berdinding","Banyak kamar","Bertingkat","Kubah besar"],answer:0}]},
+{id:29,region:"Maluku Utara",house:"Rumah Sasadu",time:90,difficulty:1.65,skyTop:"#81D4FA",skyBottom:"#B2EBF2",
+materi:["<b>Rumah Sasadu</b> adalah rumah adat suku <span class='highlight'>Sahu</span> di Halmahera.","Berbentuk rumah panggung terbuka.","Dindingnya hanya sebagian.","Atapnya dari daun sagu.","Menjadi tempat upacara adat."],
+facts:"Rumah Sasadu juga menjadi tempat <b>upacara adat Sahu</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Sahu di Halmahera — sudah ada sejak abad 16.",
+ciri:"Rumah panggung terbuka dengan dinding sebagian. Atap dari daun sagu bertumpuk. Ada altar kecil di dalam untuk sesaji.",
+fakta:["Rumah Sasadu jadi tempat upacara adat Sahu.","Dinding sebagian agar sirkulasi udara lancar.","Di dalamnya disimpan benda pusaka."]},
+quiz:[{q:"Rumah Sasadu adalah rumah adat suku...",options:["Sahu","Dani","Toraja","Bugis"],answer:0},{q:"Rumah Sasadu berasal dari...",options:["Maluku Utara","Maluku","Papua","Sulawesi"],answer:0},{q:"Rumah Sasadu berfungsi untuk...",options:["Rumah tinggal","Upacara adat","Istana","Sekolah"],answer:1}]},
+{id:30,region:"Papua",house:"Honai",time:90,difficulty:1.7,skyTop:"#81D4FA",skyBottom:"#B2EBF2",
+materi:["<b>Honai</b> adalah rumah adat suku <span class='highlight'>Dani</span> di Papua.","Bentuknya bundar seperti kubah.","Atapnya dari jerami/alang-alang.","Dinding kayu tanpa jendela.","Pintunya sangat rendah."],
+facts:"Pintu rendah mengajarkan <b>kerendahan hati</b>.",
+ensiklopedia:{sejarah:"Rumah adat suku Dani di Lembah Baliem, Papua — sudah ada sejak lebih dari 1.000 tahun.",
+ciri:"Rumah bundar seperti kubah dengan atap dari jerami/alang-alang. Dinding dari kayu bulat tanpa jendela. Pintu sangat rendah (1,2 meter).",
+fakta:["Pintu rendah mengajarkan kerendahan hati.","Honai dibagi 2: Honai untuk pria dan Ebeai untuk wanita.","Tanpa jendela agar tetap hangat."]},
+quiz:[{q:"Honai adalah rumah adat dari pulau...",options:["Jawa","Bali","Sumatera","Papua"],answer:3},{q:"Atap Honai terbuat dari...",options:["Seng","Jerami","Genteng","Kayu"],answer:1},{q:"Mengapa pintu Honai rendah?",options:["Hemat kayu","Agar menunduk (hormat)","Tidak panas","Angin masuk"],answer:1}]}
+];
+
+var ACHIEVEMENTS = [
+{id:'first_level',icon:'🌟',name:'Pemula',desc:'Menyelesaikan level pertama.',check:function(p){return p.completedLevels.length>=1;}},
+{id:'half_way',icon:'🌏',name:'Setengah Jalan',desc:'Menyelesaikan 15 level.',check:function(p){return p.completedLevels.length>=15;}},
+{id:'coin_collector',icon:'🪙',name:'Pengumpul Koin',desc:'Mengumpulkan total 50 koin.',check:function(p){return p.totalCoins>=50;}},
+{id:'house_lover',icon:'🏠',name:'Pecinta Rumah Adat',desc:'Membuka 10 rumah adat.',check:function(p){return p.unlockedHouses.length>=10;}},
+{id:'explorer',icon:'🏆',name:'Penjelajah Nusantara',desc:'Menyelesaikan semua 30 level.',check:function(p){return p.completedLevels.length>=30;}},
+{id:'star_hunter',icon:'⭐',name:'Pemburu Bintang',desc:'Mengumpulkan total 30 bintang.',check:function(p){return p.totalStars>=30;}},
+{id:'quiz_master',icon:'📝',name:'Master Quiz',desc:'Menjawab benar 50 quiz.',check:function(p){return p.correctQuiz>=50;}},
+{id:'perfect',icon:'💎',name:'Sempurna',desc:'Dapat 3 bintang di 5 level.',check:function(p){var c=0;if(p.starsByLevel){for(var k in p.starsByLevel){if(p.starsByLevel[k]>=3)c++;}}return c>=5;}}
+];
+
+var progress = { unlockedLevels:[], completedLevels:[], unlockedHouses:[],
+  totalCoins:0, totalStars:0, correctQuiz:0, bestScores:{}, starsByLevel:{}, achievements:[] };
+for (var i = 1; i <= 30; i++) progress.unlockedLevels.push(i);
+var settings = { sound:true, music:true, effect:true };
+
+function loadProgress() {
+  try {
+    var s = localStorage.getItem('panjatPinangProgress');
+    if (s) { var loaded = JSON.parse(s); progress = Object.assign(progress, loaded);
+      progress.unlockedLevels = []; for (var i = 1; i <= 30; i++) progress.unlockedLevels.push(i); }
+    var t = localStorage.getItem('panjatPinangSettings');
+    if (t) settings = Object.assign(settings, JSON.parse(t));
+  } catch(e){}
+  updateSoundButtons();
+}
+function saveProgress() { try { localStorage.setItem('panjatPinangProgress', JSON.stringify(progress)); } catch(e){} }
+function saveSettings() { try { localStorage.setItem('panjatPinangSettings', JSON.stringify(settings)); } catch(e){} }
+
+var audioCtx = null; var audioUnlocked = false;
+function getAudioCtx() { if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
+function playBeep(freq, dur, type, vol) { type = type || 'sine'; vol = vol || 0.1;
+  if (!settings.effect) return; var ctx = getAudioCtx(); if (!ctx) return;
+  try { if (ctx.state === 'suspended') ctx.resume();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+var musicPlaying = false; var musicTimer = null; var musicStep = 0; var bassStep = 0;
+var MELODY = [[392,400],[440,400],[523,400],[440,400],[392,800],[330,400],[392,400],[523,800],[494,400],[440,400],[392,400],[330,400],[294,800],[330,400],[392,400],[440,800],[523,400],[440,400],[392,1400]];
+var BASS = [[131,800],[147,800],[165,800],[147,800],[131,1600]];
+function playMusicNote(freq, dur, vol) { if (!settings.music) return; var ctx = getAudioCtx(); if (!ctx) return;
+  try { if (ctx.state === 'suspended') ctx.resume();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol || 0.05, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur / 1000);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + dur / 1000);
+  } catch(e){}
+}
+function playMusicBass(freq, dur, vol) { if (!settings.music) return; var ctx = getAudioCtx(); if (!ctx) return;
+  try { if (ctx.state === 'suspended') ctx.resume();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol || 0.035, ctx.currentTime + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur / 1000);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + dur / 1000);
+  } catch(e){}
+}
+function playNextMusicNote() { if (!musicPlaying || !settings.music) return;
+  var note = MELODY[musicStep % MELODY.length];
+  playMusicNote(note[0], note[1]);
+  if (musicStep % 2 === 0) { var bass = BASS[bassStep % BASS.length]; playMusicBass(bass[0], bass[1]); bassStep++; }
+  musicStep++; musicTimer = setTimeout(playNextMusicNote, note[1]);
+}
+function startMusic() { if (musicPlaying) return; if (!settings.music) return;
+  musicPlaying = true; musicStep = 0; bassStep = 0; playNextMusicNote(); }
+function stopMusic() { musicPlaying = false; if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; } }
+function unlockAudio() { if (audioUnlocked) return; audioUnlocked = true;
+  var ctx = getAudioCtx();
+  if (ctx) { try { var o = ctx.createOscillator(), g = ctx.createGain();
+    g.gain.value = 0; o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.01); } catch(e){} }
+  setTimeout(startMusic, 300);
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
+function sfxCoin(){ playBeep(880,0.15,'square',0.1); setTimeout(function(){playBeep(1320,0.1,'square',0.08);},60); }
+function sfxStar(){ playBeep(1046,0.1,'sine',0.12); setTimeout(function(){playBeep(1318,0.1,'sine',0.12);},80); setTimeout(function(){playBeep(1568,0.15,'sine',0.12);},160); }
+function sfxHit(){ playBeep(150,0.3,'sawtooth',0.18); }
+function sfxWin(){ [523,659,784,1046].forEach(function(f,i){setTimeout(function(){playBeep(f,0.2,'sine',0.15);}, i*120);}); }
+function sfxPrize(){ playBeep(523,0.12,'sine',0.2); setTimeout(function(){playBeep(659,0.12,'sine',0.2);},120);
+  setTimeout(function(){playBeep(784,0.12,'sine',0.2);},240); setTimeout(function(){playBeep(1046,0.15,'sine',0.22);},360);
+  setTimeout(function(){playBeep(1318,0.2,'sine',0.22);},500); setTimeout(function(){playBeep(1568,0.4,'sine',0.25);},700); }
+function sfxLose(){ [400,350,300,200].forEach(function(f,i){setTimeout(function(){playBeep(f,0.25,'sawtooth',0.15);}, i*150);}); }
+function sfxCorrect(){ playBeep(880,0.15,'sine',0.15); setTimeout(function(){playBeep(1320,0.2,'sine',0.15);},120); }
+function sfxWrong(){ playBeep(200,0.3,'sawtooth',0.15); }
+function sfxClick() {
+  playBeep(1200, 0.06, 'square', 0.08);
+  setTimeout(function(){ playBeep(1600, 0.04, 'square', 0.06); }, 30);
+}
+
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var el = document.getElementById(id); if (el) el.classList.add('active');
+  if (id === 'screenLevel') renderLevelGrid();
+  if (id === 'screenCollection') renderCollection();
+  if (id === 'screenAchievement') renderAchievements();
+}
+function showPopup(id) { var el = document.getElementById(id); if (el) el.classList.add('active'); }
+function closePopup(id) { var el = document.getElementById(id); if (el) el.classList.remove('active'); }
+function showToast(msg, color) { color = color || '#FFD700';
+  var t = document.getElementById('toast'); if (!t) return;
+  t.textContent = msg; t.style.color = color; t.style.borderColor = color; t.style.opacity = '1';
+  if (t._timeout) clearTimeout(t._timeout);
+  t._timeout = setTimeout(function(){ t.style.opacity = '0'; }, 1500); }
+function updateSoundButtons() { var hs = document.getElementById('btnSoundHome');
+  if (hs) hs.textContent = (settings.sound && settings.music) ? '🔊' : '🔇'; }
+
+function renderLevelGrid() {
+  var grid = document.getElementById('levelGrid'); if (!grid) return; grid.innerHTML = '';
+  LEVELS.forEach(function(lvl){
+    var done = progress.completedLevels.indexOf(lvl.id) !== -1;
+    var earnedStars = (progress.starsByLevel && progress.starsByLevel[lvl.id]) || 0;
+    var starsHtml = '';
+    if (earnedStars > 0) { starsHtml = '<div class="card-stars-badge">';
+      for (var s = 1; s <= 3; s++) starsHtml += s <= earnedStars ? '⭐' : '☆'; starsHtml += '</div>';
+    } else { starsHtml = '<div class="card-stars-badge" style="opacity:0.3;">☆☆☆</div>'; }
+    var card = document.createElement('div');
+    card.className = 'level-card' + (done?' completed':'');
+    var statusClass = done ? 'status-done' : 'status-open';
+    var statusText = done ? '✓ SELESAI' : 'TERBUKA';
+    card.innerHTML = '<div class="card-num-badge">LV ' + lvl.id + '</div>' + starsHtml +
+      '<div class="level-region">📍 ' + lvl.region.toUpperCase() + '</div>' +
+      '<div class="level-house">' + lvl.house + '</div>' +
+      '<div class="level-status ' + statusClass + '">' + statusText + '</div>';
+    card.onclick = function(){ startLevel(lvl.id); }; grid.appendChild(card);
+  });
+}
+function renderCollection() {
+  var grid = document.getElementById('collectionGrid'); if (!grid) return; grid.innerHTML = '';
+  LEVELS.forEach(function(lvl){
+    var unlocked = progress.unlockedHouses.indexOf(lvl.id) !== -1;
+    var card = document.createElement('div');
+    card.className = 'collection-card' + (unlocked?'':' locked');
+    if (unlocked) { card.innerHTML = '<canvas class="mini-house" width="280" height="180"></canvas>' +
+      '<div class="house-info-wrap"><div class="house-name">' + lvl.house + '</div>' +
+      '<div class="house-region">' + lvl.region + '</div></div>';
+    } else { card.innerHTML = '<div class="lock-icon">🔒</div>' +
+      '<div class="house-info-wrap"><div class="house-name">???</div>' +
+      '<div class="house-region">Belum terbuka</div></div>'; }
+    if (unlocked) card.onclick = function(){ showEnsiklopedia(lvl); };
+    grid.appendChild(card);
+    if (unlocked) { var cv = card.querySelector('.mini-house');
+      if (cv) drawHouseIllustration(lvl, cv, 280, 180); }
+  });
+}
+function showEnsiklopedia(lvl) {
+  document.getElementById('ensiklopediaRegion').textContent = lvl.region.toUpperCase();
+  document.getElementById('ensiklopediaName').textContent = lvl.house.toUpperCase();
+  var e = lvl.ensiklopedia;
+  var html = '';
+  html += '<div class="ensiklopedia-section"><h3>📖 SEJARAH</h3><p>' + e.sejarah + '</p></div>';
+  html += '<div class="ensiklopedia-section"><h3>🎨 CIRI KHAS</h3><p>' + e.ciri + '</p></div>';
+  html += '<div class="ensiklopedia-section fakta"><h3>💡 FAKTA MENARIK</h3><ul>';
+  e.fakta.forEach(function(f){ html += '<li>' + f + '</li>'; }); html += '</ul></div>';
+  document.getElementById('ensiklopediaContent').innerHTML = html;
+  drawHouseIllustration(lvl, document.getElementById('ensiklopediaIllustration'), 600, 180);
+  showPopup('popupEnsiklopedia');
+}
+function renderAchievements() {
+  var list = document.getElementById('achievementList'); if (!list) return; list.innerHTML = '';
+  ACHIEVEMENTS.forEach(function(a){
+    var unlocked = progress.achievements.indexOf(a.id) !== -1;
+    var item = document.createElement('div');
+    item.className = 'achievement-item ' + (unlocked?'unlocked':'locked');
+    item.innerHTML = '<div class="achievement-icon">' + (unlocked?a.icon:'🔒') + '</div>' +
+      '<div class="achievement-info"><div class="achievement-name">' + a.name + '</div>' +
+      '<div class="achievement-desc">' + a.desc + '</div></div>' +
+      '<div class="achievement-status">' + (unlocked?'✅':'⬜') + '</div>';
+    list.appendChild(item);
+  });
+}
+function checkAchievements() {
+  var neu = false;
+  ACHIEVEMENTS.forEach(function(a){
+    if (progress.achievements.indexOf(a.id) === -1 && a.check(progress)) {
+      progress.achievements.push(a.id); neu = true;
+      showToast('🏆 Achievement: ' + a.name, '#FFD700');
+      playBeep(1046,0.2,'sine',0.12);
+      setTimeout(function(){playBeep(1318,0.2,'sine',0.12);},150);
+      setTimeout(function(){playBeep(1568,0.3,'sine',0.12);},300);
+    }
+  });
+  if (neu) saveProgress();
+}
+
+var canvas = document.getElementById('gameCanvas');
+var ctx = canvas.getContext('2d');
+var POLE_X = 450, POLE_W = 70, VIEW_W = 900, VIEW_H = 540;
+var game = { running:false, paused:false, level:null, levelId:1, score:0, coins:0, stars:0,
+  lives:3, maxLives:3, timeLeft:100,
+  player:{ worldY:0, side:1, sideLerp:1, climbAnim:0, invuln:0, climbing:false },
+  cameraY: 0, worldHeight: 3000, obstacles: [], collectibles: [], particles: [], floatTexts: [],
+  keys: {}, lastTime: 0 };
+
+function startLevel(levelId) {
+  var lvl = null;
+  for (var i = 0; i < LEVELS.length; i++) { if (LEVELS[i].id === levelId) { lvl = LEVELS[i]; break; } }
+  if (!lvl) return;
+  game.levelId = levelId; game.level = lvl;
+  game.score = 0; game.coins = 0; game.stars = 0;
+  game.lives = 3; game.maxLives = 3;
+  game.timeLeft = lvl.time; game.worldHeight = 2400 + levelId * 60;
+  game.player.worldY = game.worldHeight - 60; game.player.side = 1; game.player.sideLerp = 1;
+  game.player.climbAnim = 0; game.player.invuln = 90; game.player.climbing = false;
+  game.cameraY = game.worldHeight - VIEW_H;
+  game.obstacles = []; game.collectibles = []; game.particles = []; game.floatTexts = [];
+  generateContent();
+  showScreen('screenGame'); updateHUD(); closeAllPopups();
+  game.running = true; game.paused = false; game.lastTime = performance.now();
+  requestAnimationFrame(gameLoop);
+}
+function closeAllPopups() {
+  var popups = document.querySelectorAll('.popup-overlay');
+  for (var i = 0; i < popups.length; i++) popups[i].classList.remove('active');
+}
+function restartLevel() { closeAllPopups(); startLevel(game.levelId); }
+function quitToMenu() { game.running=false; game.paused=false; closeAllPopups(); showScreen('screenHome'); }
+
+function generateContent() {
+  var lvl = game.level; var wh = game.worldHeight; var usedObstacleY = [];
+  function canPlaceObstacle(y) { for (var i=0;i<usedObstacleY.length;i++) if (Math.abs(usedObstacleY[i]-y)<150) return false; return true; }
+  function itemSafeFromObstacle(y) { for (var i=0;i<usedObstacleY.length;i++) if (Math.abs(usedObstacleY[i]-y)<45) return false; return true; }
+  var numObstacles = Math.floor(8 + game.levelId * 1.0);
+  var attempts = 0;
+  while (usedObstacleY.length < numObstacles && attempts < 500) {
+    attempts++;
+    var y = 250 + Math.random() * (wh - 500);
+    if (!canPlaceObstacle(y)) continue;
+    var typeRoll = Math.random();
+    if (typeRoll < 0.4) { game.obstacles.push({ type:'bird', x: POLE_X + 200, y: y, w: 30, h: 20, vx: -0.9, range: [POLE_X-200, POLE_X+200], animOffset: Math.random()*Math.PI*2 }); }
+    else if (typeRoll < 0.8) { var bs = Math.random() < 0.5 ? -1 : 1;
+      game.obstacles.push({ type:'branch', x: POLE_X + bs * 20, y: y, w: 65, h: 14, side: bs, animOffset: Math.random()*Math.PI*2 }); }
+    else { var fs = Math.random() < 0.5 ? -1 : 1;
+      game.obstacles.push({ type:'fruit', x: POLE_X + fs * (POLE_W/2 + 18), y: y, w: 22, h: 22, vy: 0.5, baseY: y, range: [y-35, y+35], animOffset: Math.random()*Math.PI*2 }); }
+    usedObstacleY.push(y);
+  }
+  for (var i = 0; i < 60; i++) {
+    var t = i / 60; var yItem = 120 + t * (wh - 240);
+    if (!itemSafeFromObstacle(yItem)) continue;
+    var side = Math.random() < 0.5 ? -1 : 1;
+    var baseX = POLE_X + side * (POLE_W/2 + 18);
+    if (Math.random() < 0.6) { var num = 1 + Math.floor(Math.random()*2);
+      for (var k = 0; k < num; k++) game.collectibles.push({ type:'coin', x: baseX, y: yItem + k*26 - (num-1)*13, w: 24, h: 24, collected:false, animOffset: Math.random()*Math.PI*2 }); }
+    if (Math.random() < 0.18) { var s = Math.random() < 0.5 ? -1 : 1;
+      game.collectibles.push({ type:'star', x: POLE_X + s * (POLE_W/2 + 18), y: yItem, w: 28, h: 28, collected:false, animOffset: Math.random()*Math.PI*2 }); }
+    if (Math.random() < 0.08) { var s2 = Math.random() < 0.5 ? -1 : 1;
+      game.collectibles.push({ type:'heart', x: POLE_X + s2 * (POLE_W/2 + 18), y: yItem, w: 24, h: 24, collected:false, animOffset: Math.random()*Math.PI*2 }); }
+  }
+  game.collectibles.push({ type:'prize', x: POLE_X, y: 60, w: 60, h: 60, collected: false, animOffset: 0 });
+}
+function gameLoop(now) {
+  if (!game.running) return;
+  var dt = Math.min(50, now - game.lastTime) / 16.67;
+  game.lastTime = now;
+  if (!game.paused) updateGame(dt);
+  drawGame(); updateHUD();
+  requestAnimationFrame(gameLoop);
+}
+function updateGame(dt) {
+  var p = game.player; var lvl = game.level;
+  game.timeLeft -= dt / 60;
+  if (game.timeLeft <= 0) { game.timeLeft = 0; gameOver('Waktu habis!'); return; }
+  if (p.invuln > 0) p.invuln -= dt;
+  var climb = game.keys[' '] || game.keys['ArrowUp'] || game.keys['w'] || game.keys['W'] || game.keys['up'];
+  var left = game.keys['ArrowLeft'] || game.keys['a'] || game.keys['A'] || game.keys['left'];
+  var right = game.keys['ArrowRight'] || game.keys['d'] || game.keys['D'] || game.keys['right'];
+  p.climbing = climb;
+  if (climb) { p.worldY -= 2.4 * dt; p.climbAnim += dt * 0.3; } else { p.worldY += 0.5 * dt; }
+  if (climb && Math.random() < 0.002 * lvl.difficulty) { p.worldY += 20; showToast('💦 Tiang licin!', '#FF5252');
+    if (settings.effect) playBeep(300, 0.12, 'sawtooth', 0.1); }
+  if (left && p.side !== -1) { p.side = -1; p.sideLerp = 0; }
+  if (right && p.side !== 1) { p.side = 1; p.sideLerp = 0; }
+  if (p.sideLerp < 1) p.sideLerp = Math.min(1, p.sideLerp + dt * 0.14);
+  if (p.worldY < 80) p.worldY = 80;
+  if (p.worldY > game.worldHeight - 30) p.worldY = game.worldHeight - 30;
+  if (p.worldY <= 80) { var prize = null;
+    for (var i = 0; i < game.collectibles.length; i++) { if (game.collectibles[i].type === 'prize') { prize = game.collectibles[i]; break; } }
+    if (prize) prize.collected = true; finishLevel(); return; }
+  var targetCamY = p.worldY - VIEW_H * 0.6;
+  var maxCamY = game.worldHeight - VIEW_H;
+  var clamped = Math.max(0, Math.min(maxCamY, targetCamY));
+  game.cameraY += (clamped - game.cameraY) * 0.15 * dt;
+  game.obstacles.forEach(function(o){
+    if (o.type === 'bird') { o.x += o.vx * dt;
+      if (o.x < o.range[0]) { o.x = o.range[0]; o.vx *= -1; }
+      if (o.x > o.range[1]) { o.x = o.range[1]; o.vx *= -1; }
+    } else if (o.type === 'fruit') { o.y += o.vy * dt;
+      if (o.y < o.range[0] || o.y > o.range[1]) o.vy *= -1; }
+    o.animOffset += dt * 0.1;
+  });
+  game.particles = game.particles.filter(function(pt){ pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.vy += 0.15 * dt; pt.life -= dt; return pt.life > 0; });
+  game.floatTexts = game.floatTexts.filter(function(f){ f.y -= 1 * dt; f.life -= dt; return f.life > 0; });
+  var playerScreenX = getPlayerX(); var playerScreenY = p.worldY - game.cameraY;
+  var pickupRadius = 32;
+  game.collectibles.forEach(function(c){
+    if (c.collected) return;
+    var cScreenY = c.y - game.cameraY;
+    if (cScreenY < -60 || cScreenY > VIEW_H + 60) return;
+    var dx = c.x - playerScreenX, dy = cScreenY - playerScreenY;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < pickupRadius + c.w/2) {
+      c.collected = true;
+      if (c.type === 'coin') { game.coins++; game.score += 25; spawnFloatText(c.x, cScreenY, '+25', '#FFD700'); spawnParticles(c.x, cScreenY, '#FFD700', 6); if (settings.effect) sfxCoin(); }
+      else if (c.type === 'star') { game.stars++; game.score += 50; spawnFloatText(c.x, cScreenY, '+50', '#FFEB3B'); spawnParticles(c.x, cScreenY, '#FFEB3B', 8); if (settings.effect) sfxStar(); }
+      else if (c.type === 'heart') { game.lives = Math.min(game.maxLives, game.lives + 1); spawnFloatText(c.x, cScreenY, '+❤', '#FF5252'); spawnParticles(c.x, cScreenY, '#FF5252', 6); if (settings.effect) sfxStar(); }
+    }
+  });
+  if (p.invuln <= 0) {
+    for (var i = 0; i < game.obstacles.length; i++) {
+      var o = game.obstacles[i]; var oScreenY = o.y - game.cameraY;
+      if (oScreenY < -60 || oScreenY > VIEW_H + 60) continue;
+      var px = playerScreenX - 12, py = playerScreenY - 20, pw = 24, ph = 40;
+      var ox = o.x - o.w/2 + 4, oy = oScreenY - o.h/2 + 3, ow = o.w - 8, oh = o.h - 6;
+      if (rectOverlap(px, py, pw, ph, ox, oy, ow, oh)) { loseLife(); p.invuln = 90; p.worldY += 20; break; }
+    }
+  }
+  checkAchievements();
+}
+function getPlayerX() { var p = game.player;
+  var targetX = POLE_X + p.side * (POLE_W/2 + 18);
+  var startX = POLE_X - p.side * (POLE_W/2 + 18);
+  return startX + (targetX - startX) * p.sideLerp; }
+function rectOverlap(x1,y1,w1,h1,x2,y2,w2,h2) { return x1 < x2+w2 && x1+w1 > x2 && y1 < y2+h2 && y1+h1 > y2; }
+function loseLife() { game.lives--; if (settings.effect) sfxHit();
+  canvas.style.filter = 'brightness(1.5) sepia(1) hue-rotate(-30deg)';
+  setTimeout(function(){ canvas.style.filter=''; }, 120);
+  if (game.lives <= 0) { game.lives = 0; game.running = false; gameOver('Nyawa habis!'); } }
+function finishLevel() {
+  game.running = false; game.score += 200 + 500;
+  var timeBonus = Math.floor(game.timeLeft * 5); game.score += timeBonus;
+  if (settings.effect) sfxWin();
+  if (progress.completedLevels.indexOf(game.levelId) === -1) progress.completedLevels.push(game.levelId);
+  if (progress.unlockedHouses.indexOf(game.levelId) === -1) progress.unlockedHouses.push(game.levelId);
+  progress.totalCoins += game.coins; progress.totalStars += game.stars;
+  if (!progress.bestScores[game.levelId] || game.score > progress.bestScores[game.levelId]) progress.bestScores[game.levelId] = game.score;
+  checkAchievements(); saveProgress();
+  showPrizeExplosion();
+  setTimeout(function(){
+    document.getElementById('levelCompletePoints').textContent = '+' + (500 + 200 + timeBonus) + ' POINT';
+    showPopup('popupLevelComplete');
+  }, 2400);
+}
+function showPrizeExplosion() {
+  var el = document.getElementById('prizeExplosion'); if (!el) return;
+  el.innerHTML = '';
+  var allItems = ['🚲','🏆','📺','📱','🎮','⌚','👟','🎧','🎒','🛵','💻','🎸','🛴','🍰','🎁','💰'];
+  var shuffled = allItems.slice().sort(function(){ return Math.random() - 0.5; });
+  var picked = shuffled.slice(0, 6);
+  var chest = document.createElement('div'); chest.className = 'chest-center'; chest.textContent = '📦'; el.appendChild(chest);
+  picked.forEach(function(item, idx){ var itemEl = document.createElement('div');
+    itemEl.className = 'prize-item i' + (idx + 1); itemEl.textContent = item; el.appendChild(itemEl); });
+  var txt = document.createElement('div'); txt.className = 'prize-text'; txt.textContent = '🎉 HADIAH DIBUKA! 🎉'; el.appendChild(txt);
+  el.classList.add('show');
+  var colors = ['#FFD700','#FF6347','#42A5F5','#66BB6A','#FFEB3B','#FF5252','#FFFFFF','#FF8C42','#E63946','#9C27B0'];
+  for (var i = 0; i < 80; i++) { (function(idx){
+    setTimeout(function(){ var c = document.createElement('div'); c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-20px';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.borderRadius = Math.random() < 0.5 ? '50%' : '2px';
+      c.style.width = (8 + Math.random() * 14) + 'px'; c.style.height = (8 + Math.random() * 14) + 'px';
+      c.style.animationDuration = (1.6 + Math.random() * 1.6) + 's';
+      document.body.appendChild(c); setTimeout(function(){ c.remove(); }, 3400); }, idx * 25); })(i); }
+  if (settings.effect) sfxPrize();
+  setTimeout(function(){ el.classList.remove('show'); }, 2400);
+}
+function gameOver(reason) {
+  game.running = false; if (settings.effect) sfxLose();
+  if (!progress.bestScores[game.levelId] || game.score > progress.bestScores[game.levelId]) progress.bestScores[game.levelId] = game.score;
+  saveProgress();
+  document.getElementById('gameOverReason').textContent = reason;
+  document.getElementById('gameOverScore').textContent = game.score;
+  document.getElementById('gameOverCoins').textContent = game.coins;
+  document.getElementById('gameOverLevel').textContent = game.levelId;
+  showPopup('popupGameOver');
+}
+function pauseGame() { if (!game.running) return; game.paused = true; showPopup('popupPause'); }
+function resumeGame() { game.paused = false; game.lastTime = performance.now(); closePopup('popupPause'); }
+function spawnParticle(x, y, color, size, life) { game.particles.push({ x:x, y:y, vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4 - 1, color:color, size:size, life: life || 30 }); }
+function spawnParticles(x, y, color, count) { for (var i = 0; i < count; i++) spawnParticle(x, y, color, 3 + Math.random()*4, 40); }
+function spawnFloatText(x, y, text, color) { game.floatTexts.push({ x:x, y:y, text:text, color:color, life:60 }); }
+
+function drawGame() {
+  var W = VIEW_W, H = VIEW_H; var lvl = game.level; var camY = game.cameraY;
+  var sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, lvl.skyTop); sky.addColorStop(1, lvl.skyBottom);
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  drawClouds(camY * 0.15); drawMountains(camY * 0.35); drawGround(camY);
+  drawPole(camY); drawCollectibles(camY); drawObstacles(camY); drawPlayer();
+  game.particles.forEach(function(p){ ctx.globalAlpha = Math.max(0, p.life / 30);
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); });
+  ctx.globalAlpha = 1;
+  game.floatTexts.forEach(function(f){ ctx.globalAlpha = Math.min(1, f.life / 30);
+    ctx.fillStyle = f.color; ctx.font = 'bold 16px Poppins, sans-serif'; ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 3;
+    ctx.strokeText(f.text, f.x, f.y); ctx.fillText(f.text, f.x, f.y); });
+  ctx.globalAlpha = 1;
+  var p = game.player; var playerScreenY = p.worldY - camY;
+  if (playerScreenY < 120 && p.worldY > 100) { ctx.save(); ctx.globalAlpha = 0.7 + Math.sin(Date.now()/200)*0.3;
+    ctx.fillStyle = '#FFD700'; ctx.font = 'bold 18px Poppins, sans-serif'; ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 3;
+    ctx.strokeText('⬆ PUNCAK DI ATAS! ⬆', W/2, 80); ctx.fillText('⬆ PUNCAK DI ATAS! ⬆', W/2, 80); ctx.restore(); }
+  if (p.invuln > 0 && Math.floor(p.invuln/5)%2===0) { ctx.fillStyle = 'rgba(255,0,0,0.1)'; ctx.fillRect(0, 0, W, H); }
+}
+function drawClouds(offset) { ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  [{x:100,y:80,s:1},{x:400,y:140,s:0.8},{x:650,y:60,s:1.1},{x:800,y:180,s:0.7}].forEach(function(c){
+    var y = (c.y - offset) % 700; if (y < -100) y += 700;
+    ctx.beginPath(); ctx.arc(c.x, y, 25*c.s, 0, Math.PI*2);
+    ctx.arc(c.x + 25*c.s, y + 5*c.s, 20*c.s, 0, Math.PI*2);
+    ctx.arc(c.x - 25*c.s, y + 5*c.s, 18*c.s, 0, Math.PI*2);
+    ctx.arc(c.x + 10*c.s, y - 15*c.s, 18*c.s, 0, Math.PI*2);
+    ctx.arc(c.x - 10*c.s, y - 12*c.s, 16*c.s, 0, Math.PI*2); ctx.fill(); });
+}
+function drawMountains(offset) { var W = VIEW_W, H = VIEW_H;
+  ctx.fillStyle = 'rgba(80,120,60,0.45)'; ctx.beginPath(); ctx.moveTo(0, H);
+  var baseY = H - 40 + offset * 0.4;
+  ctx.lineTo(0, baseY-100); ctx.lineTo(150, baseY-220); ctx.lineTo(300, baseY-100);
+  ctx.lineTo(450, baseY-280); ctx.lineTo(600, baseY-100); ctx.lineTo(750, baseY-200);
+  ctx.lineTo(900, baseY-120); ctx.lineTo(900, H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(60,100,50,0.65)'; ctx.beginPath(); ctx.moveTo(0, H);
+  var baseY2 = H + offset * 0.6;
+  ctx.lineTo(0, baseY2-80); ctx.lineTo(200, baseY2-180); ctx.lineTo(400, baseY2-60);
+  ctx.lineTo(600, baseY2-160); ctx.lineTo(900, baseY2-80); ctx.lineTo(900, H);
+  ctx.closePath(); ctx.fill();
+}
+function drawGround(camY) { var groundScreenY = game.worldHeight - camY;
+  if (groundScreenY < VIEW_H + 100) {
+    var grad = ctx.createLinearGradient(0, groundScreenY, 0, groundScreenY + 200);
+    grad.addColorStop(0, '#4CAF50'); grad.addColorStop(1, '#1B5E20');
+    ctx.fillStyle = grad; ctx.fillRect(0, groundScreenY, VIEW_W, VIEW_H - groundScreenY + 200);
+    ctx.fillStyle = '#388E3C';
+    for (var x = 0; x < VIEW_W; x += 20) ctx.fillRect(x, groundScreenY - 6, 3, 8); }
+}
+function drawPole(camY) {
+  var poleTopY = 60 - camY, poleBottomY = game.worldHeight - camY;
+  var grad = ctx.createLinearGradient(POLE_X - POLE_W/2, 0, POLE_X + POLE_W/2, 0);
+  grad.addColorStop(0, '#6D4C41'); grad.addColorStop(0.3, '#A1887F');
+  grad.addColorStop(0.5, '#BCAAA4'); grad.addColorStop(0.7, '#A1887F'); grad.addColorStop(1, '#5D4037');
+  ctx.fillStyle = grad; ctx.fillRect(POLE_X - POLE_W/2, poleTopY, POLE_W, poleBottomY - poleTopY);
+  ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 2;
+  for (var wy = 60; wy < game.worldHeight; wy += 50) { var y = wy - camY;
+    if (y < -20 || y > VIEW_H + 20) continue;
+    ctx.beginPath(); ctx.moveTo(POLE_X - POLE_W/2, y); ctx.lineTo(POLE_X + POLE_W/2, y); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(POLE_X - POLE_W/2, poleTopY, 7, poleBottomY - poleTopY);
+  ctx.fillRect(POLE_X + POLE_W/2 - 7, poleTopY, 7, poleBottomY - poleTopY);
+  var leafScreenY = 40 - camY;
+  if (leafScreenY > -200 && leafScreenY < VIEW_H + 200) {
+    ctx.save(); ctx.translate(POLE_X, leafScreenY + 20);
+    for (var i = 0; i < 8; i++) { var angle = (i/8) * Math.PI * 2;
+      var lx = Math.cos(angle) * 60, ly = Math.sin(angle) * 40;
+      ctx.save(); ctx.translate(lx, ly); ctx.rotate(angle);
+      ctx.fillStyle = i % 2 === 0 ? '#2E7D32' : '#43A047';
+      ctx.beginPath(); ctx.ellipse(0, 0, 50, 17, 0, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+    ctx.fillStyle = '#1B5E20'; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+  for (var j = 0; j < game.collectibles.length; j++) { var c = game.collectibles[j];
+    if (c.type === 'prize' && !c.collected) { var py = c.y - camY;
+      if (py > -100 && py < VIEW_H + 100) drawPrize(POLE_X, py); break; } }
+}
+function drawPrize(cx, cy) { ctx.save(); ctx.translate(cx, cy);
+  var s = 1 + Math.sin(Date.now()/200) * 0.1; ctx.scale(s, s);
+  ctx.fillStyle = '#FFD700'; ctx.fillRect(-25, -20, 50, 40);
+  ctx.fillStyle = '#FF6347'; ctx.fillRect(-25, -5, 50, 12); ctx.fillRect(-5, -20, 12, 40);
+  ctx.fillStyle = '#FF4500';
+  ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(-15, -35); ctx.lineTo(-5, -20); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(15, -35); ctx.lineTo(5, -20); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+/* ============================================================
+   KARAKTER BARU — Anak Kecil Memeluk Pohon (Menghadap Kamera)
+============================================================ */
+function drawPlayer() {
+  var p = game.player;
+  var x = getPlayerX();
+  var y = p.worldY - game.cameraY;
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Efek invulnerability (kedip)
+  if (p.invuln > 0 && Math.floor(p.invuln/5)%2===0) ctx.globalAlpha = 0.5;
+
+  // Arah: player di KIRI pohon → menghadap kanan (pohon di sisi kanan)
+  //       player di KANAN pohon → menghadap kiri (pohon di sisi kiri)
+  var facing = (p.side === -1) ? 1 : -1;
+  var climbPhase = p.climbing ? p.climbAnim : 0;
+  var climbBob = p.climbing ? Math.sin(climbPhase * 4) * 1.5 : 0;
+
+  ctx.translate(0, climbBob);
+
+  // ========== BAYANGAN ==========
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(0, 30, 16, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // ========== KAKI MELINGKAR POHON ==========
+  // Kaki belakang (di belakang pohon, lebih gelap)
+  ctx.strokeStyle = '#5D4037';
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(facing * -4, 15);
+  ctx.quadraticCurveTo(facing * 6, 20, facing * 14, 22);
+  ctx.stroke();
+
+  // Kaki depan (di depan pohon) — bergerak saat memanjat
+  var legLift = p.climbing ? Math.sin(climbPhase * 4 + Math.PI) * 2.5 : 0;
+  ctx.strokeStyle = '#8D6E63';
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(facing * -6, 14);
+  ctx.quadraticCurveTo(facing * 4, 20 + legLift, facing * 10, 24 + legLift);
+  ctx.stroke();
+
+  // Sepatu/sandal
+  ctx.fillStyle = '#3E2723';
+  ctx.beginPath();
+  ctx.ellipse(facing * 11, 26 + legLift, 5, 3.5, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // ========== SARUNG KUNING ==========
+  ctx.fillStyle = '#FFC107';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(-12, 6, 24, 12, 4);
+  else ctx.rect(-12, 6, 24, 12);
+  ctx.fill();
+  ctx.strokeStyle = '#F57C00';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Motif sarung (garis-garis)
+  ctx.strokeStyle = 'rgba(245,124,0,0.6)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-6, 6); ctx.lineTo(-6, 18);
+  ctx.moveTo(0, 6); ctx.lineTo(0, 18);
+  ctx.moveTo(6, 6); ctx.lineTo(6, 18);
+  ctx.stroke();
+
+  // ========== BADAN (baju merah) ==========
+  ctx.fillStyle = '#E53935';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(-13, -12, 26, 22, 6);
+  else ctx.rect(-13, -12, 26, 22);
+  ctx.fill();
+  ctx.strokeStyle = '#B71C1C';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Kerah baju (putih)
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.moveTo(-6, -12);
+  ctx.lineTo(0, -6);
+  ctx.lineTo(6, -12);
+  ctx.closePath();
+  ctx.fill();
+
+  // Sabuk
+  ctx.fillStyle = '#5D4037';
+  ctx.fillRect(-13, 4, 26, 4);
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath();
+  ctx.arc(0, 6, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // ========== TANGAN ATAS (meraih ke atas memegang pohon) ==========
+  var armUpLift = p.climbing ? Math.sin(climbPhase * 4) * 4 : 0;
+  ctx.strokeStyle = '#FFCC80';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(facing * -6, -10);
+  ctx.quadraticCurveTo(facing * 8, -18 + armUpLift, facing * 16, -22 + armUpLift);
+  ctx.stroke();
+
+  // Telapak tangan atas (menggenggam pohon)
+  ctx.fillStyle = '#FFCC80';
+  ctx.beginPath();
+  ctx.arc(facing * 17, -22 + armUpLift, 4.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#D7A86E';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // ========== TANGAN BAWAH (melingkar mengapit pohon) ==========
+  ctx.strokeStyle = '#FFCC80';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(facing * -6, -2);
+  ctx.quadraticCurveTo(facing * 8, 2, facing * 14, 4);
+  ctx.stroke();
+
+  // Telapak tangan bawah
+  ctx.fillStyle = '#FFCC80';
+  ctx.beginPath();
+  ctx.arc(facing * 15, 4, 4.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#D7A86E';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // ========== LEHER ==========
+  ctx.fillStyle = '#FFCC80';
+  if (ctx.roundRect) {
+    ctx.beginPath();
+    ctx.roundRect(-4, -18, 8, 7, 2);
+    ctx.fill();
+  } else {
+    ctx.fillRect(-4, -18, 8, 7);
+  }
+
+  // ========== KEPALA (menghadap kamera) ==========
+  var headY = -30;
+
+  // Kepala bulat
+  ctx.fillStyle = '#FFCC80';
+  ctx.beginPath();
+  ctx.arc(0, headY, 13, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#D7A86E';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Telinga kiri & kanan
+  ctx.fillStyle = '#FFCC80';
+  ctx.beginPath();
+  ctx.arc(-12, headY + 1, 3, 0, Math.PI*2);
+  ctx.arc(12, headY + 1, 3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#D7A86E';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // ========== RAMBUT ==========
+  // Rambut belakang (cokelat tua)
+  ctx.fillStyle = '#4E342E';
+  ctx.beginPath();
+  ctx.arc(0, headY - 3, 13, Math.PI * 0.95, Math.PI * 2.05);
+  ctx.fill();
+
+  // Rambut depan (poni)
+  ctx.beginPath();
+  ctx.moveTo(-13, headY - 3);
+  ctx.quadraticCurveTo(-5, headY - 15, 5, headY - 14);
+  ctx.quadraticCurveTo(10, headY - 12, 13, headY - 3);
+  ctx.lineTo(10, headY - 6);
+  ctx.quadraticCurveTo(0, headY - 12, -10, headY - 6);
+  ctx.closePath();
+  ctx.fill();
+
+  // ========== IKAT KEPALA MERAH PUTIH ==========
+  ctx.fillStyle = '#D32F2F';
+  ctx.beginPath();
+  ctx.moveTo(-13, headY - 8);
+  ctx.lineTo(13, headY - 8);
+  ctx.lineTo(13, headY - 2);
+  ctx.lineTo(-13, headY - 2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Strip putih di ikat kepala
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(-13, headY - 6, 26, 1.5);
+
+  // Simpul ikat kepala di kanan
+  ctx.fillStyle = '#D32F2F';
+  ctx.beginPath();
+  ctx.moveTo(12, headY - 6);
+  ctx.lineTo(17, headY - 10);
+  ctx.lineTo(15, headY - 3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(12, headY - 5);
+  ctx.lineTo(17, headY - 2);
+  ctx.lineTo(14, headY + 2);
+  ctx.closePath();
+  ctx.fill();
+
+  // ========== WAJAH ==========
+  // Mata kiri (bulat besar)
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.ellipse(-4.5, headY - 1, 3, 3.5, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.3;
+  ctx.stroke();
+
+  // Pupil mata kiri
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(-4, headY - 1, 1.8, 0, Math.PI*2);
+  ctx.fill();
+
+  // Highlight mata kiri
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.arc(-3.5, headY - 1.8, 0.7, 0, Math.PI*2);
+  ctx.fill();
+
+  // Mata kanan
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.ellipse(4.5, headY - 1, 3, 3.5, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.3;
+  ctx.stroke();
+
+  // Pupil mata kanan
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(5, headY - 1, 1.8, 0, Math.PI*2);
+  ctx.fill();
+
+  // Highlight mata kanan
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.arc(5.5, headY - 1.8, 0.7, 0, Math.PI*2);
+  ctx.fill();
+
+  // Pipi merona kiri
+  ctx.fillStyle = 'rgba(255,100,100,0.5)';
+  ctx.beginPath();
+  ctx.arc(-7, headY + 4, 3, 0, Math.PI*2);
+  ctx.fill();
+
+  // Pipi merona kanan
+  ctx.beginPath();
+  ctx.arc(7, headY + 4, 3, 0, Math.PI*2);
+  ctx.fill();
+
+  // Mulut (tersenyum kecil)
+  ctx.strokeStyle = '#8B0000';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, headY + 5, 3, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  // ========== EFEK KERINGAT ==========
+  if (p.climbing && Math.random() < 0.015) {
+    game.particles.push({
+      x: x + 10,
+      y: y + headY - 5,
+      vx: 1 + (Math.random() - 0.5) * 2,
+      vy: -1 - Math.random() * 1,
+      color: '#64B5F6',
+      size: 2 + Math.random() * 1.5,
+      life: 25
+    });
+  }
+
+  ctx.restore();
+}
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (w < 2*r) r = w/2; if (h < 2*r) r = h/2;
+    this.beginPath(); this.moveTo(x+r, y);
+    this.arcTo(x+w, y, x+w, y+h, r); this.arcTo(x+w, y+h, x, y+h, r);
+    this.arcTo(x, y+h, x, y, r); this.arcTo(x, y, x+w, y, r); this.closePath();
+    return this;
+  };
+}
+function drawObstacles(camY) {
+  game.obstacles.forEach(function(o){
+    var y = o.y - camY;
+    if (y < -60 || y > VIEW_H + 60) return;
+    ctx.save(); ctx.translate(o.x, y);
+    if (o.type === 'bird') {
+      var flap = Math.sin(o.animOffset*5) * 0.5;
+      var dir = o.vx > 0 ? 1 : -1;
+      ctx.fillStyle = '#37474F';
+      ctx.beginPath(); ctx.ellipse(0, 0, 13, 7, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(11*dir, -3, 5.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFA000';
+      ctx.beginPath(); ctx.moveTo(11*dir, -3); ctx.lineTo(17*dir, -1.5); ctx.lineTo(11*dir, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#546E7A';
+      ctx.save(); ctx.translate(0, -3); ctx.rotate(flap);
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-16,-10); ctx.lineTo(-5,0); ctx.closePath(); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.translate(0, -3); ctx.rotate(-flap);
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(16,-10); ctx.lineTo(5,0); ctx.closePath(); ctx.fill(); ctx.restore();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(11*dir, -4, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(11.5*dir, -4, 0.9, 0, Math.PI*2); ctx.fill();
+    } else if (o.type === 'branch') {
+      ctx.fillStyle = '#5D4037';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(-o.w/2, -o.h/2, o.w, o.h, 4); } else { ctx.fillRect(-o.w/2, -o.h/2, o.w, o.h); }
+      if (ctx.roundRect) ctx.fill();
+      ctx.strokeStyle = '#3E2723'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#2E7D32';
+      ctx.beginPath(); ctx.ellipse(-o.w/2 + 8, -o.h/2 - 4, 8, 5, -0.4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(o.w/2 - 8, -o.h/2 - 4, 8, 5, 0.4, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#B71C1C';
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+    } else if (o.type === 'fruit') {
+      ctx.fillStyle = '#FF8F00';
+      ctx.beginPath(); ctx.arc(0, 0, o.w/2, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#E65100'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = '#5D4037'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, -o.h/2); ctx.lineTo(0, -o.h/2 - 5); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.arc(-3, -3, 3, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  });
+}
+function drawCollectibles(camY) {
+  game.collectibles.forEach(function(c){
+    if (c.collected) return;
+    var y = c.y - camY;
+    if (y < -60 || y > VIEW_H + 60) return;
+    ctx.save(); ctx.translate(c.x, y);
+    if (c.type === 'coin') {
+      var sx = Math.abs(Math.cos(c.animOffset + Date.now()/300));
+      ctx.scale(sx, 1);
+      var grad = ctx.createRadialGradient(-3, -3, 2, 0, 0, 12);
+      grad.addColorStop(0, '#FFF59D'); grad.addColorStop(0.5, '#FFD700'); grad.addColorStop(1, '#FFA000');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#B8860B'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('$', 0, 1);
+    } else if (c.type === 'star') {
+      var glow = 0.7 + Math.sin(Date.now()/200 + c.animOffset) * 0.3;
+      ctx.shadowColor = '#FFEB3B'; ctx.shadowBlur = 15 * glow;
+      ctx.fillStyle = '#FFEB3B'; drawStarShape(0, 0, 5, 14, 6); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#F9A825'; ctx.lineWidth = 1.5; ctx.stroke();
+    } else if (c.type === 'heart') {
+      ctx.fillStyle = '#FF5252';
+      ctx.beginPath(); ctx.moveTo(0, 6);
+      ctx.bezierCurveTo(-11, -4, -7, -13, 0, -7);
+      ctx.bezierCurveTo(7, -13, 11, -4, 0, 6); ctx.fill();
+      ctx.strokeStyle = '#B71C1C'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    ctx.restore();
+  });
+}
+function drawStarShape(cx, cy, spikes, outerR, innerR) {
+  var rot = Math.PI / 2 * 3; var step = Math.PI / spikes;
+  ctx.beginPath(); ctx.moveTo(cx, cy - outerR);
+  for (var i = 0; i < spikes; i++) {
+    var x = cx + Math.cos(rot) * outerR, y = cy + Math.sin(rot) * outerR;
+    ctx.lineTo(x, y); rot += step;
+    x = cx + Math.cos(rot) * innerR; y = cy + Math.sin(rot) * innerR;
+    ctx.lineTo(x, y); rot += step; }
+  ctx.lineTo(cx, cy - outerR); ctx.closePath();
+}
+function updateHUD() {
+  var lvl = game.level; if (!lvl) return;
+  document.getElementById('hudLevel').textContent = 'LEVEL ' + lvl.id + ' - ' + lvl.region.toUpperCase();
+  var sc = String(game.score); while (sc.length < 4) sc = '0' + sc;
+  document.getElementById('hudScore').textContent = sc;
+  var m = Math.floor(game.timeLeft/60), s = Math.floor(game.timeLeft%60);
+  var timeEl = document.getElementById('hudTime');
+  var ms = String(m); if (ms.length < 2) ms = '0' + ms;
+  var ss = String(s); if (ss.length < 2) ss = '0' + ss;
+  timeEl.textContent = '⏱ ' + ms + ':' + ss;
+  if (game.timeLeft < 20) timeEl.classList.add('warning'); else timeEl.classList.remove('warning');
+  var livesStr = '';
+  for (var i = 0; i < game.maxLives; i++) livesStr += i < game.lives ? '❤️' : '🖤';
+  document.getElementById('hudLives').textContent = livesStr;
+  var pct = Math.round((1 - (game.player.worldY - 80) / (game.worldHeight - 110)) * 100);
+  var clamped = Math.max(0, Math.min(100, pct));
+  document.getElementById('hudProgressFill').style.width = clamped + '%';
+  document.getElementById('hudProgressText').textContent = clamped + '%';
+}
+
+function drawHouseIllustration(lvl, container, w, h) {
+  w = w || 600; h = h || 180;
+  var c;
+  if (container.tagName === 'CANVAS') { c = container; c.width = w; c.height = h; }
+  else { c = document.createElement('canvas'); container.innerHTML = ''; container.appendChild(c);
+    c.style.width = '100%'; c.style.height = '100%'; c.style.display = 'block';
+    c.width = w; c.height = h; }
+  var cc = c.getContext('2d');
+  var sky = cc.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, '#87CEEB'); sky.addColorStop(0.6, '#FFE4B5'); sky.addColorStop(1, '#FFD9A0');
+  cc.fillStyle = sky; cc.fillRect(0, 0, w, h);
+  cc.fillStyle = 'rgba(255,215,0,0.5)';
+  cc.beginPath(); cc.arc(w * 0.85, h * 0.22, h * 0.14, 0, Math.PI * 2); cc.fill();
+  cc.fillStyle = '#FFD700'; cc.beginPath(); cc.arc(w * 0.85, h * 0.22, h * 0.09, 0, Math.PI * 2); cc.fill();
+  cc.fillStyle = 'rgba(255,255,255,0.9)';
+  cc.beginPath(); cc.arc(w * 0.12, h * 0.18, h * 0.08, 0, Math.PI * 2);
+  cc.arc(w * 0.17, h * 0.2, h * 0.1, 0, Math.PI * 2);
+  cc.arc(w * 0.22, h * 0.18, h * 0.08, 0, Math.PI * 2); cc.fill();
+  cc.fillStyle = '#5D4037'; cc.fillRect(w * 0.08, h - h * 0.35, 3, h * 0.15);
+  cc.fillStyle = '#388E3C'; cc.beginPath(); cc.arc(w * 0.08 + 1, h - h * 0.4, h * 0.08, 0, Math.PI * 2); cc.fill();
+  cc.fillStyle = '#5D4037'; cc.fillRect(w * 0.93, h - h * 0.35, 3, h * 0.15);
+  cc.fillStyle = '#388E3C'; cc.beginPath(); cc.arc(w * 0.93 + 1, h - h * 0.4, h * 0.08, 0, Math.PI * 2); cc.fill();
+  var groundH = h * 0.22;
+  var groundGrad = cc.createLinearGradient(0, h - groundH, 0, h);
+  groundGrad.addColorStop(0, '#4CAF50'); groundGrad.addColorStop(1, '#2E7D32');
+  cc.fillStyle = groundGrad; cc.fillRect(0, h - groundH, w, groundH);
+  cc.fillStyle = '#388E3C';
+  for (var g = 0; g < w; g += 8) { var gh = 3 + Math.random() * 5; cc.fillRect(g, h - groundH - gh, 2, gh); }
+  var flowerColors = ['#FF5252', '#FFEB3B', '#42A5F5', '#FF8C42', '#AB47BC'];
+  for (var f = 0; f < 6; f++) { var fx = 40 + Math.random() * (w - 80);
+    var fc = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+    cc.fillStyle = fc; cc.beginPath(); cc.arc(fx, h - groundH - 6, 3, 0, Math.PI * 2); cc.fill();
+    cc.fillStyle = '#FFD700'; cc.beginPath(); cc.arc(fx, h - groundH - 6, 1.5, 0, Math.PI * 2); cc.fill(); }
+  var cx = w / 2, baseY = h - groundH;
+  drawHouseByType(cc, lvl.id, cx, baseY, w, h);
+}
+function drawHouseByType(cc, id, cx, baseY, W, H) {
+  var scale = W / 600;
+  function pillars(count, spacing) { cc.fillStyle = '#3E2723';
+    for (var i = -Math.floor(count/2); i <= Math.floor(count/2); i++) cc.fillRect(cx + i * spacing * scale - 2, baseY - 30, 4, 30); }
+  if (id === 1) { pillars(9, 18);
+    cc.fillStyle = '#8B4513'; cc.fillRect(cx - 75 * scale, baseY - 55, 150 * scale, 30);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16 * scale, 20);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 90 * scale, baseY - 55); cc.lineTo(cx - 70 * scale, baseY - 95);
+    cc.lineTo(cx + 70 * scale, baseY - 95); cc.lineTo(cx + 90 * scale, baseY - 55);
+    cc.closePath(); cc.fill();
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 70 * scale, baseY - 50, 140 * scale, 2);
+  } else if (id === 2) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 70 * scale, baseY - 60, 140 * scale, 30);
+    cc.fillStyle = '#5D4037';
+    for (var i = -60; i <= 60; i += 20) cc.fillRect(cx + i * scale, baseY - 55, 8 * scale, 8);
+    cc.fillStyle = '#4E342E'; cc.beginPath(); cc.moveTo(cx - 85 * scale, baseY - 60);
+    cc.quadraticCurveTo(cx - 50 * scale, baseY - 100, cx - 20 * scale, baseY - 85);
+    cc.lineTo(cx + 20 * scale, baseY - 85);
+    cc.quadraticCurveTo(cx + 50 * scale, baseY - 100, cx + 85 * scale, baseY - 60);
+    cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 40, 20 * scale, 15);
+  } else if (id === 3) { pillars(9, 18);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 75 * scale, baseY - 55, 150 * scale, 30);
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 70 * scale, baseY - 50, 140 * scale, 3);
+    cc.fillStyle = '#D32F2F'; cc.beginPath();
+    cc.moveTo(cx - 90 * scale, baseY - 55);
+    cc.quadraticCurveTo(cx - 70 * scale, baseY - 105, cx - 45 * scale, baseY - 85);
+    cc.quadraticCurveTo(cx - 25 * scale, baseY - 100, cx, baseY - 90);
+    cc.quadraticCurveTo(cx + 25 * scale, baseY - 100, cx + 45 * scale, baseY - 85);
+    cc.quadraticCurveTo(cx + 70 * scale, baseY - 105, cx + 90 * scale, baseY - 55);
+    cc.lineTo(cx + 70 * scale, baseY - 55); cc.lineTo(cx + 30 * scale, baseY - 80);
+    cc.lineTo(cx - 30 * scale, baseY - 80); cc.lineTo(cx - 70 * scale, baseY - 55);
+    cc.closePath(); cc.fill();
+    cc.fillStyle = '#B71C1C';
+    cc.beginPath(); cc.moveTo(cx - 95 * scale, baseY - 55); cc.lineTo(cx - 75 * scale, baseY - 110); cc.lineTo(cx - 55 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.beginPath(); cc.moveTo(cx + 95 * scale, baseY - 55); cc.lineTo(cx + 75 * scale, baseY - 110); cc.lineTo(cx + 55 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 40, 20 * scale, 15);
+  } else if (id === 4) { pillars(9, 18);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 75 * scale, baseY - 60, 150 * scale, 30);
+    cc.fillStyle = '#8D6E63';
+    cc.fillRect(cx - 85 * scale, baseY - 65, 20 * scale, 8);
+    cc.fillRect(cx + 65 * scale, baseY - 65, 20 * scale, 8);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 60); cc.lineTo(cx - 60 * scale, baseY - 100);
+    cc.lineTo(cx + 60 * scale, baseY - 100); cc.lineTo(cx + 95 * scale, baseY - 60); cc.closePath(); cc.fill();
+  } else if (id === 5) { pillars(8, 17);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 65 * scale, baseY - 65, 130 * scale, 30);
+    cc.fillStyle = '#A1887F';
+    for (var i = -55; i <= 55; i += 20) cc.fillRect(cx + i * scale, baseY - 60, 10, 6);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 85 * scale, baseY - 65); cc.lineTo(cx - 60 * scale, baseY - 105);
+    cc.lineTo(cx + 60 * scale, baseY - 105); cc.lineTo(cx + 85 * scale, baseY - 65); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 20);
+  } else if (id === 6) { pillars(9, 18);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 75 * scale, baseY - 55, 150 * scale, 25);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 55); cc.lineTo(cx - 60 * scale, baseY - 80);
+    cc.lineTo(cx + 60 * scale, baseY - 80); cc.lineTo(cx + 95 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.beginPath();
+    cc.moveTo(cx - 70 * scale, baseY - 80); cc.lineTo(cx - 40 * scale, baseY - 100);
+    cc.lineTo(cx + 40 * scale, baseY - 100); cc.lineTo(cx + 70 * scale, baseY - 80); cc.closePath(); cc.fill();
+    cc.fillStyle = '#2E1A0F'; cc.fillRect(cx - 3 * scale, baseY - 110, 6 * scale, 15);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16, 15);
+  } else if (id === 7) { pillars(7, 22);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 65 * scale, baseY - 55, 130 * scale, 25);
+    cc.fillStyle = '#5D4037';
+    for (var i = -2; i <= 2; i++) { cc.beginPath();
+      cc.moveTo(cx + (i * 25 - 15) * scale, baseY - 55); cc.lineTo(cx + i * 25 * scale, baseY - 95);
+      cc.lineTo(cx + (i * 25 + 15) * scale, baseY - 55); cc.closePath(); cc.fill(); }
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16, 15);
+  } else if (id === 8) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 70 * scale, baseY - 70, 140 * scale, 30);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 75 * scale, baseY - 75, 150 * scale, 5);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 85 * scale, baseY - 70); cc.lineTo(cx - 55 * scale, baseY - 110);
+    cc.lineTo(cx + 55 * scale, baseY - 110); cc.lineTo(cx + 85 * scale, baseY - 70); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 55, 20, 15);
+  } else if (id === 9) { pillars(7, 22);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 70 * scale, baseY - 55, 140 * scale, 25);
+    cc.fillStyle = '#8D6E63';
+    cc.fillRect(cx - 85 * scale, baseY - 50, 15 * scale, 20);
+    cc.fillRect(cx + 70 * scale, baseY - 50, 15 * scale, 20);
+    cc.fillStyle = '#D32F2F'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 55);
+    cc.quadraticCurveTo(cx - 70 * scale, baseY - 85, cx - 40 * scale, baseY - 75);
+    cc.quadraticCurveTo(cx, baseY - 90, cx + 40 * scale, baseY - 75);
+    cc.quadraticCurveTo(cx + 70 * scale, baseY - 85, cx + 95 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#FFD700';
+    for (var i = -80; i <= 80; i += 12) cc.fillRect(cx + i * scale, baseY - 55, 6 * scale, 4);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 45, 20, 15);
+  } else if (id === 10) { pillars(7, 20);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 65 * scale, baseY - 55, 130 * scale, 25);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 100 * scale, baseY - 55);
+    cc.quadraticCurveTo(cx - 60 * scale, baseY - 95, cx - 20 * scale, baseY - 80);
+    cc.lineTo(cx + 20 * scale, baseY - 80);
+    cc.quadraticCurveTo(cx + 60 * scale, baseY - 95, cx + 100 * scale, baseY - 55);
+    cc.lineTo(cx + 70 * scale, baseY - 55); cc.lineTo(cx + 30 * scale, baseY - 75);
+    cc.lineTo(cx - 30 * scale, baseY - 75); cc.lineTo(cx - 70 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16, 15);
+  } else if (id === 11 || id === 12 || id === 13) { pillars(7, 22);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 70 * scale, baseY - 55, 140 * scale, 25);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 55); cc.lineTo(cx - 55 * scale, baseY - 80);
+    cc.lineTo(cx + 55 * scale, baseY - 80); cc.lineTo(cx + 95 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.beginPath();
+    cc.moveTo(cx - 65 * scale, baseY - 80); cc.lineTo(cx - 35 * scale, baseY - 105);
+    cc.lineTo(cx + 35 * scale, baseY - 105); cc.lineTo(cx + 65 * scale, baseY - 80); cc.closePath(); cc.fill();
+    cc.fillStyle = '#2E1A0F'; cc.fillRect(cx - 3 * scale, baseY - 115, 6 * scale, 15);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16, 15);
+  } else if (id === 14) {
+    cc.fillStyle = '#8D6E63';
+    cc.fillRect(cx - 75 * scale, baseY - 70, 18 * scale, 70);
+    cc.fillRect(cx + 57 * scale, baseY - 70, 18 * scale, 70);
+    cc.fillStyle = '#5D4037';
+    cc.beginPath(); cc.moveTo(cx - 80 * scale, baseY - 70); cc.lineTo(cx - 66 * scale, baseY - 100); cc.lineTo(cx - 52 * scale, baseY - 70); cc.closePath(); cc.fill();
+    cc.beginPath(); cc.moveTo(cx + 52 * scale, baseY - 70); cc.lineTo(cx + 66 * scale, baseY - 100); cc.lineTo(cx + 80 * scale, baseY - 70); cc.closePath(); cc.fill();
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 50 * scale, baseY - 55, 100 * scale, 25);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 55 * scale, baseY - 55); cc.lineTo(cx - 30 * scale, baseY - 85);
+    cc.lineTo(cx + 30 * scale, baseY - 85); cc.lineTo(cx + 55 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 45 * scale, baseY - 50, 90 * scale, 2);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 45, 20, 15);
+  } else if (id === 15) { pillars(9, 18);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 80 * scale, baseY - 70, 160 * scale, 30);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 70); cc.lineTo(cx - 55 * scale, baseY - 115);
+    cc.lineTo(cx + 55 * scale, baseY - 115); cc.lineTo(cx + 95 * scale, baseY - 70); cc.closePath(); cc.fill();
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 75 * scale, baseY - 65, 150 * scale, 2);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 10 * scale, baseY - 55, 20, 20);
+  } else if (id === 16) {
+    cc.fillStyle = '#8D6E63';
+    cc.beginPath(); cc.ellipse(cx, baseY - 20, 45 * scale, 25, 0, 0, Math.PI*2); cc.fill();
+    cc.fillStyle = '#A1887F'; cc.beginPath();
+    cc.moveTo(cx - 55 * scale, baseY - 20); cc.lineTo(cx, baseY - 105);
+    cc.lineTo(cx + 55 * scale, baseY - 20); cc.closePath(); cc.fill();
+    cc.strokeStyle = '#6D4C41'; cc.lineWidth = 1;
+    for (var i = -45; i <= 45; i += 10) { cc.beginPath();
+      cc.moveTo(cx + i * scale, baseY - 20); cc.lineTo(cx + (i * 0.4) * scale, baseY - 100); cc.stroke(); }
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 15, 16 * scale, 15);
+  } else if (id === 17 || id === 20) { pillars(13, 18);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 110 * scale, baseY - 60, 220 * scale, 30);
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 105 * scale, baseY - 55, 210 * scale, 2);
+    cc.fillStyle = '#B71C1C';
+    for (var i = -100; i <= 100; i += 25) { cc.beginPath(); cc.arc(cx + i * scale, baseY - 45, 4, 0, Math.PI * 2); cc.fill(); }
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 120 * scale, baseY - 60); cc.lineTo(cx - 90 * scale, baseY - 95);
+    cc.lineTo(cx + 90 * scale, baseY - 95); cc.lineTo(cx + 120 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723';
+    for (var i = -60; i <= 60; i += 40) cc.fillRect(cx + i * scale - 5, baseY - 50, 10, 20);
+  } else if (id === 18) { pillars(11, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 95 * scale, baseY - 65, 190 * scale, 30);
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 90 * scale, baseY - 60, 180 * scale, 2);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 105 * scale, baseY - 65); cc.lineTo(cx - 75 * scale, baseY - 100);
+    cc.lineTo(cx + 75 * scale, baseY - 100); cc.lineTo(cx + 105 * scale, baseY - 65); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723';
+    for (var i = -50; i <= 50; i += 30) cc.fillRect(cx + i * scale - 4, baseY - 55, 8, 20);
+  } else if (id === 19) { pillars(9, 18);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 70 * scale, baseY - 60, 140 * scale, 25);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 85 * scale, baseY - 58, 15 * scale, 22);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 90 * scale, baseY - 60); cc.lineTo(cx - 30 * scale, baseY - 120);
+    cc.lineTo(cx + 30 * scale, baseY - 120); cc.lineTo(cx + 90 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.fillStyle = '#2E1A0F'; cc.beginPath();
+    cc.moveTo(cx - 30 * scale, baseY - 120); cc.lineTo(cx, baseY - 140);
+    cc.lineTo(cx + 30 * scale, baseY - 120); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 15);
+  } else if (id === 21) { pillars(11, 18);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 95 * scale, baseY - 60, 190 * scale, 30);
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 90 * scale, baseY - 55, 180 * scale, 2);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 105 * scale, baseY - 60); cc.lineTo(cx - 70 * scale, baseY - 100);
+    cc.lineTo(cx + 70 * scale, baseY - 100); cc.lineTo(cx + 105 * scale, baseY - 60); cc.closePath(); cc.fill();
+  } else if (id === 22) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 70 * scale, baseY - 60, 140 * scale, 30);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 90 * scale, baseY - 60);
+    cc.quadraticCurveTo(cx - 50 * scale, baseY - 105, cx, baseY - 90);
+    cc.quadraticCurveTo(cx + 50 * scale, baseY - 105, cx + 90 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.strokeStyle = '#3E2723'; cc.lineWidth = 3;
+    cc.beginPath(); cc.moveTo(cx - 20 * scale, baseY - 95);
+    cc.quadraticCurveTo(cx - 10 * scale, baseY - 115, cx - 5 * scale, baseY - 110); cc.stroke();
+    cc.beginPath(); cc.moveTo(cx + 20 * scale, baseY - 95);
+    cc.quadraticCurveTo(cx + 10 * scale, baseY - 115, cx + 5 * scale, baseY - 110); cc.stroke();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 15);
+  } else if (id === 23) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 70 * scale, baseY - 60, 140 * scale, 30);
+    cc.fillStyle = '#A1887F'; cc.beginPath();
+    cc.moveTo(cx - 85 * scale, baseY - 60); cc.lineTo(cx - 55 * scale, baseY - 95);
+    cc.lineTo(cx + 55 * scale, baseY - 95); cc.lineTo(cx + 85 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.strokeStyle = '#6D4C41'; cc.lineWidth = 1;
+    for (var i = -70; i <= 70; i += 12) { cc.beginPath();
+      cc.moveTo(cx + i * scale, baseY - 60); cc.lineTo(cx + (i * 0.8) * scale, baseY - 90); cc.stroke(); }
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 15);
+  } else if (id === 24) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 70 * scale, baseY - 60, 140 * scale, 30);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 90 * scale, baseY - 60); cc.lineTo(cx - 40 * scale, baseY - 115);
+    cc.lineTo(cx + 40 * scale, baseY - 115); cc.lineTo(cx + 90 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 15);
+  } else if (id === 25) { pillars(7, 20);
+    cc.fillStyle = '#A1887F'; cc.fillRect(cx - 70 * scale, baseY - 55, 140 * scale, 30);
+    cc.fillStyle = '#B71C1C'; cc.fillRect(cx - 65 * scale, baseY - 50, 130 * scale, 3);
+    cc.fillStyle = '#000'; cc.fillRect(cx - 65 * scale, baseY - 45, 130 * scale, 3);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 100 * scale, baseY - 55);
+    cc.quadraticCurveTo(cx - 50 * scale, baseY - 110, cx, baseY - 90);
+    cc.quadraticCurveTo(cx + 50 * scale, baseY - 110, cx + 100 * scale, baseY - 55);
+    cc.lineTo(cx + 70 * scale, baseY - 55);
+    cc.quadraticCurveTo(cx + 40 * scale, baseY - 85, cx, baseY - 80);
+    cc.quadraticCurveTo(cx - 40 * scale, baseY - 85, cx - 70 * scale, baseY - 55); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723';
+    cc.beginPath(); cc.moveTo(cx - 80 * scale, baseY - 60); cc.lineTo(cx - 95 * scale, baseY - 85);
+    cc.lineTo(cx - 88 * scale, baseY - 88); cc.lineTo(cx - 78 * scale, baseY - 62); cc.closePath(); cc.fill();
+    cc.beginPath(); cc.moveTo(cx + 80 * scale, baseY - 60); cc.lineTo(cx + 95 * scale, baseY - 85);
+    cc.lineTo(cx + 88 * scale, baseY - 88); cc.lineTo(cx + 78 * scale, baseY - 62); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 45, 16, 20);
+  } else if (id === 26) { pillars(7, 20);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 65 * scale, baseY - 60, 130 * scale, 30);
+    cc.fillStyle = '#5D4037'; cc.beginPath();
+    cc.moveTo(cx - 80 * scale, baseY - 60); cc.lineTo(cx - 50 * scale, baseY - 85);
+    cc.lineTo(cx + 50 * scale, baseY - 85); cc.lineTo(cx + 80 * scale, baseY - 60); cc.closePath(); cc.fill();
+    cc.fillStyle = '#3E2723'; cc.beginPath();
+    cc.moveTo(cx - 55 * scale, baseY - 85); cc.lineTo(cx - 30 * scale, baseY - 105);
+    cc.lineTo(cx + 30 * scale, baseY - 105); cc.lineTo(cx + 55 * scale, baseY - 85); cc.closePath(); cc.fill();
+    cc.fillStyle = '#2E1A0F'; cc.fillRect(cx - 3 * scale, baseY - 115, 6 * scale, 15);
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 8 * scale, baseY - 50, 16, 15);
+  } else if (id === 27) { pillars(9, 18);
+    cc.fillStyle = '#8D6E63'; cc.fillRect(cx - 90 * scale, baseY - 65, 180 * scale, 30);
+    cc.fillStyle = '#FFD700'; cc.fillRect(cx - 85 * scale, baseY - 60, 170 * scale, 2);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 100 * scale, baseY - 65); cc.lineTo(cx - 70 * scale, baseY - 100);
+    cc.lineTo(cx + 70 * scale, baseY - 100); cc.lineTo(cx + 100 * scale, baseY - 65); cc.closePath(); cc.fill();
+  } else if (id === 28 || id === 29) {
+    cc.fillStyle = '#3E2723';
+    for (var i = -3; i <= 3; i++) cc.fillRect(cx + i * 22 * scale - 2, baseY - 70, 4, 70);
+    cc.fillStyle = '#5D4037'; cc.fillRect(cx - 75 * scale, baseY - 20, 150 * scale, 6);
+    cc.fillStyle = '#4E342E'; cc.beginPath();
+    cc.moveTo(cx - 95 * scale, baseY - 70); cc.lineTo(cx - 20 * scale, baseY - 125);
+    cc.lineTo(cx + 20 * scale, baseY - 125); cc.lineTo(cx + 95 * scale, baseY - 70); cc.closePath(); cc.fill();
+    cc.strokeStyle = '#2E1A0F'; cc.lineWidth = 1;
+    for (var i = -80; i <= 80; i += 15) { cc.beginPath();
+      cc.moveTo(cx + i * scale, baseY - 70); cc.lineTo(cx + (i * 0.4) * scale, baseY - 115); cc.stroke(); }
+  } else if (id === 30) {
+    cc.fillStyle = '#8D6E63';
+    cc.beginPath(); cc.ellipse(cx, baseY - 30, 45 * scale, 30, 0, 0, Math.PI * 2); cc.fill();
+    cc.fillStyle = '#A1887F'; cc.beginPath();
+    cc.moveTo(cx - 55 * scale, baseY - 30); cc.lineTo(cx, baseY - 95);
+    cc.lineTo(cx + 55 * scale, baseY - 30); cc.closePath(); cc.fill();
+    cc.strokeStyle = '#6D4C41'; cc.lineWidth = 1;
+    for (var i = -50; i <= 50; i += 10) { cc.beginPath();
+      cc.moveTo(cx + i * scale, baseY - 30); cc.lineTo(cx + (i * 0.3) * scale, baseY - 90); cc.stroke(); }
+    cc.fillStyle = '#3E2723'; cc.fillRect(cx - 6 * scale, baseY - 22, 12 * scale, 22);
+  }
+}
+
+function buildMateriContent(lvl) {
+  var html = '<h3>📘 ' + lvl.house + '</h3>';
+  html += '<p><b>Asal:</b> ' + lvl.region + '</p>';
+  lvl.materi.forEach(function(p){ html += '<p>' + p + '</p>'; });
+  html += '<div class="facts"><b>💡 Tahukah kamu?</b><br>' + lvl.facts + '</div>';
+  document.getElementById('materiContent').innerHTML = html;
+}
+
+var quizState = { current: 0, correct: 0, total: 0, quizList: [], level: null };
+function showMateriFromLevelComplete() {
+  closePopup('popupLevelComplete');
+  var lvl = game.level;
+  document.getElementById('materiRegion').textContent = lvl.region.toUpperCase();
+  document.getElementById('materiName').textContent = lvl.house.toUpperCase();
+  buildMateriContent(lvl);
+  drawHouseIllustration(lvl, document.getElementById('materiIllustration'), 600, 180);
+  document.getElementById('btnStartQuizFromMateri').textContent = '📝 MULAI QUIZ (3 SOAL)';
+  document.getElementById('btnStartQuizFromMateri').onclick = function(){ startQuiz(); };
+  showPopup('popupMateri');
+}
+function startQuiz() {
+  closePopup('popupMateri');
+  var lvl = game.level;
+  quizState.level = lvl; quizState.quizList = lvl.quiz;
+  quizState.total = lvl.quiz.length;
+  quizState.current = 0; quizState.correct = 0;
+  showQuizQuestion(); showPopup('popupQuiz');
+}
+function showQuizQuestion() {
+  var q = quizState.quizList[quizState.current];
+  document.getElementById('quizNumLabel').textContent = 'Soal ' + (quizState.current+1) + ' / ' + quizState.total;
+  document.getElementById('quizScoreLabel').textContent = 'Benar: ' + quizState.correct;
+  document.getElementById('quizProgressFill').style.width = ((quizState.current) / quizState.total * 100) + '%';
+  document.getElementById('quizQuestion').textContent = q.q;
+  var optWrap = document.getElementById('quizOptions');
+  optWrap.innerHTML = '';
+  q.options.forEach(function(opt, i){
+    var b = document.createElement('button');
+    b.className = 'quiz-option';
+    b.textContent = String.fromCharCode(65+i) + '. ' + opt;
+    b.onclick = function(){ checkQuizAnswer(i, b); };
+    optWrap.appendChild(b);
+  });
+  document.getElementById('quizNextBtnWrap').style.display = 'none';
+}
+function checkQuizAnswer(selected, btnEl) {
+  var q = quizState.quizList[quizState.current];
+  var buttons = document.querySelectorAll('#quizOptions .quiz-option');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].disabled = true;
+    if (i === q.answer) buttons[i].classList.add('correct');
+  }
+  if (selected === q.answer) {
+    btnEl.classList.add('correct'); quizState.correct++; game.score += 100;
+    if (settings.effect) sfxCorrect();
+    showToast('✓ BENAR! +100 POINT', '#66BB6A');
+  } else {
+    btnEl.classList.add('wrong');
+    if (settings.effect) sfxWrong();
+    showToast('✗ BELUM TEPAT', '#FF5252');
+  }
+  document.getElementById('quizScoreLabel').textContent = 'Benar: ' + quizState.correct;
+  document.getElementById('quizProgressFill').style.width = ((quizState.current+1) / quizState.total * 100) + '%';
+  var btn = document.getElementById('btnQuizNext');
+  btn.textContent = quizState.current < quizState.total - 1 ? 'LANJUT ➡' : '🏁 LIHAT HASIL';
+  document.getElementById('quizNextBtnWrap').style.display = 'flex';
+}
+function nextQuiz() {
+  quizState.current++;
+  if (quizState.current >= quizState.total) showQuizResult();
+  else showQuizQuestion();
+}
+function showQuizResult() {
+  closePopup('popupQuiz');
+  var total = quizState.total, correct = quizState.correct;
+  var emoji, title, detail, starsStr;
+  if (correct === total) { emoji='🏆'; title='SEMPURNA!'; detail='Kamu sudah memahami rumah adat ini dengan sangat baik!'; starsStr='⭐⭐⭐'; }
+  else if (correct >= Math.ceil(total*0.67)) { emoji='🎉'; title='BAGUS!'; detail='Pemahamanmu sudah baik, terus belajar ya!'; starsStr='⭐⭐'; }
+  else if (correct >= 1) { emoji='🙂'; title='LUMAYAN'; detail='Coba baca ulang materinya untuk lebih paham.'; starsStr='⭐'; }
+  else { emoji='😅'; title='BELUM TEPAT'; detail='Jangan menyerah, baca materi lagi dan coba lagi!'; starsStr='💪'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = correct + ' / ' + total;
+  document.getElementById('resultStars').textContent = starsStr;
+  document.getElementById('resultDetail').textContent = detail;
+  var bonus = correct === total ? 300 : (correct >= Math.ceil(total*0.67) ? 150 : 50);
+  game.score += bonus;
+  document.getElementById('resultBonus').textContent = '+' + bonus;
+  var earnedStars = calculateStars(game.levelId, game.coins, game.lives, correct, total);
+  if (!progress.starsByLevel) progress.starsByLevel = {};
+  var prevStars = progress.starsByLevel[game.levelId] || 0;
+  if (earnedStars > prevStars) progress.starsByLevel[game.levelId] = earnedStars;
+  progress.correctQuiz += correct;
+  saveProgress(); checkAchievements();
+  showPopup('popupQuizResult');
+}
+function calculateStars(levelId, coins, lives, quizCorrect, quizTotal) {
+  var star = 1;
+  if (coins >= 8) star++;
+  if (lives >= 3 && quizCorrect >= Math.ceil(quizTotal*0.67)) star++;
+  return Math.min(3, star);
+}
+function continueFromResult() {
+  closePopup('popupQuizResult');
+  if (progress.completedLevels.length >= LEVELS.length) { showPopup('popupAllComplete'); return; }
+  showScreen('screenLevel'); renderLevelGrid();
+}
+
+document.addEventListener('keydown', function(e){
+  if ((e.key === ' ' || e.key.indexOf('Arrow') === 0) &&
+      document.getElementById('screenGame').classList.contains('active')) {
+    e.preventDefault();
+  }
+  game.keys[e.key] = true;
+  if (e.key === 'a' || e.key === 'A') game.keys['a'] = true;
+  if (e.key === 'd' || e.key === 'D') game.keys['d'] = true;
+  if (e.key === 'w' || e.key === 'W') game.keys['w'] = true;
+  if (e.key === 'Escape' && game.running && !game.paused) pauseGame();
+});
+document.addEventListener('keyup', function(e){
+  game.keys[e.key] = false;
+  if (e.key === 'a' || e.key === 'A') game.keys['a'] = false;
+  if (e.key === 'd' || e.key === 'D') game.keys['d'] = false;
+  if (e.key === 'w' || e.key === 'W') game.keys['w'] = false;
+});
+function setupMobileControls() {
+  var bindHold = function(id, key) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    var start = function(e){ e.preventDefault(); game.keys[key] = true; };
+    var end = function(e){ e.preventDefault(); game.keys[key] = false; };
+    btn.addEventListener('touchstart', start, { passive: false });
+    btn.addEventListener('touchend', end, { passive: false });
+    btn.addEventListener('touchcancel', end, { passive: false });
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', end);
+  };
+  bindHold('btnLeft', 'left');
+  bindHold('btnRight', 'right');
+  bindHold('btnUp', ' ');
+}
+
+/* ============================================================
+   RESPONSIVE SCALING — AUTO FULLSCREEN DI HP
+============================================================ */
+function resizeGame() {
+  var wrap = document.getElementById('gameWrap');
+  var app = document.getElementById('app');
+  var appW = app.clientWidth;
+  var appH = app.clientHeight;
+  var scaleX = appW / 900;
+  var scaleY = appH / 540;
+  var scale = Math.min(scaleX, scaleY);
+  wrap.style.transform = 'scale(' + scale + ')';
+}
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', function(){ setTimeout(resizeGame, 200); });
+window.addEventListener('load', function(){
+  resizeGame();
+  setTimeout(resizeGame, 100);
+  setTimeout(resizeGame, 500);
+});
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resizeGame);
+  window.visualViewport.addEventListener('scroll', resizeGame);
+}
+
+function setupButtonSounds() {
+  // Suara klik untuk semua tombol, termasuk tombol yang dibuat secara dinamis.
+  // Kontrol gameplay dikecualikan agar tidak berisik saat ditekan berulang.
+  var excludedIds = ['btnLeft', 'btnRight', 'btnUp', 'btnSoundHome'];
+
+  if (window._buttonSoundHandlerAttached) return;
+  window._buttonSoundHandlerAttached = true;
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest ? e.target.closest('button') : null;
+    if (!btn) return;
+    if (excludedIds.indexOf(btn.id) !== -1) return;
+    if (settings.effect) sfxClick();
+  });
+}
+
+function initGame() {
+  setupButtonSounds();
+  loadProgress();
+  updateSoundButtons();
+  setupMobileControls();
+
+  // Suara khusus saat tombol PANJAT ditekan.
+  var climbButton = document.getElementById('btnUp');
+  if (climbButton && !climbButton._climbSoundAttached) {
+    climbButton._climbSoundAttached = true;
+    climbButton.addEventListener('pointerdown', function() {
+      if (settings.effect && game.running && !game.paused) {
+        if (!climbButton._lastClimbSound || Date.now() - climbButton._lastClimbSound > 120) {
+          climbButton._lastClimbSound = Date.now();
+          playBeep(500 + Math.random() * 300, 0.05, 'square', 0.05);
+        }
+      }
+    });
+  }
+
+  resizeGame();
+  renderLevelGrid();
+  renderCollection();
+  renderAchievements();
+
+  document.getElementById('btnPlay').onclick = function(){ unlockAudio(); showScreen('screenLevel'); };
+  document.getElementById('btnHowTo').onclick = function(){ unlockAudio(); showPopup('popupHowTo'); };
+  document.getElementById('btnCollection').onclick = function(){ unlockAudio(); showScreen('screenCollection'); };
+  document.getElementById('btnAchievement').onclick = function(){ unlockAudio(); showScreen('screenAchievement'); };
+  document.getElementById('btnBackLevel').onclick = function(){ showScreen('screenHome'); };
+  document.getElementById('btnBackCollection').onclick = function(){ showScreen('screenHome'); };
+  document.getElementById('btnBackAchievement').onclick = function(){ showScreen('screenHome'); };
+  document.getElementById('btnHowToClose').onclick = function(){ closePopup('popupHowTo'); };
+  document.getElementById('btnPause').onclick = function(){ if (game.running && !game.paused) pauseGame(); };
+  document.getElementById('btnResume').onclick = resumeGame;
+  document.getElementById('btnRestart').onclick = restartLevel;
+  document.getElementById('btnQuit').onclick = quitToMenu;
+  document.getElementById('btnRetry').onclick = restartLevel;
+  document.getElementById('btnGoMenu').onclick = quitToMenu;
+  document.getElementById('btnShowMateri').onclick = showMateriFromLevelComplete;
+  document.getElementById('btnStartQuizFromMateri').onclick = startQuiz;
+  document.getElementById('btnQuizNext').onclick = nextQuiz;
+  document.getElementById('btnResultContinue').onclick = continueFromResult;
+  document.getElementById('btnAllCompleteClose').onclick = quitToMenu;
+  document.getElementById('btnCloseEnsiklopedia').onclick = function(){ closePopup('popupEnsiklopedia'); };
+
+  document.getElementById('btnSoundHome').onclick = function(){
+    unlockAudio();
+    settings.sound = !settings.sound;
+    settings.effect = settings.sound;
+    settings.music = settings.sound;
+    saveSettings(); updateSoundButtons();
+    showToast(settings.sound ? '🔊 Suara ON' : '🔇 Suara OFF');
+    if (settings.sound) { playBeep(880, 0.15, 'sine', 0.15); stopMusic(); setTimeout(startMusic, 200); }
+    else { stopMusic(); }
+  };
+  document.getElementById('btnInfoHome').onclick = function(){
+    unlockAudio();
+    showToast('🎮 Panjat Pinang - Petualangan Rumah Adat v4.0', '#FFD700');
+  };
+}
+window.addEventListener('load', initGame);
+</script>
+
+</body>
+</html>
